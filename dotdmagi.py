@@ -25,12 +25,13 @@ OWNED = {
     'BEASTMANESSENCE':18,
     'FESTIVALESSENCE':6,
     'UNDERGROUNDESSENCE':15,
-    'DWARFTROOPS':10,
-    'DWARFGENERALS':5,
+    'DWARFTROOPS':44,
+    'DWARFGENERALS':18,
     'MAGICALBEINGTROOPS':10,
     'MAGICALBEINGGENERALS':10,
     'DRAGONESSENCE':10,
     'DRAGONMOUNTS':20,
+    "KATH'IN":False,   #For Fury of the Deep, since owning this gen affects it greatly.
     
 }
 if EXTRAFUNC == 'showparams':
@@ -664,6 +665,164 @@ m.newDmg(10*4+15*3)
 m.newTrigTag('aquatic')
 m.newDmg(100)
 m.newProc(13)
+#
+m = Magic("Fury of the Deep","FotD")
+m.newDmg(10)
+m.newTrigTag('aquatic')
+m.newDmg(45)
+m.newTrigTag('aquatic')
+m.newDmg( lambda : 30 if OWNED["KATH'IN"] else 0 )
+m.newProc(100)
+#
+m = Magic("Unity","uni")
+m.newDmg(50)
+m.newTrig('spellcast',"Deathmark")
+m.newDmg(50)
+m.newTrig('spellcast',"Volatile Runes")
+m.newDmg(50)
+m.newTrigTag('guild')
+m.newDmg(300)
+m.newProc(20)
+#
+m = Magic("Deathmark","DM")
+m.newDmg(100)
+m.newTrig('spellowned',"Deathmark")
+m.newDmg(100)
+m.newTrigTag('guild')
+m.newDmg(190)
+m.newProc(11)
+#
+m = Magic("Rally","rally")
+#   This wants you to calc for # of Spirit Raven set pieces owned. Not doing it.
+m.newTrigTag('guild')
+m.newDmg(120)
+m.newTrig('spellcast',["Unity","Deathmark","Volatile Runes"])
+m.newDmg(200)
+m.newProc(6)
+#
+m = Magic("Volatile Runes","VR")
+m.newDmg(100)
+m.newTrig('spellowned',"Volatile Runes")
+m.newDmg(200)
+m.newTrig('spellcast',"Volatile Runes")
+m.newDmg(100)
+m.newTrigTag('guild')
+m.newDmg(300)
+m.newProc(10)
+#
+m = Magic("Weightlessness","weight")
+m.newDmg(100)
+m.newTrig('spellowned',"Weightlessness")
+m.newDmg(100)
+m.newTrigTag('siege')
+m.newDmg(200)
+m.newProc(10)
+#
+m = Magic("Avalanche","ava")
+m.newDmg(100)
+m.newTrigTag('winter')
+m.newDmg(350)
+m.newTrigTag('siege')
+m.newDmg(200)
+m.newTrigTag('siege')
+m.newTrig('spellcast',"Weightlessness")
+m.newDmg(300)
+m.newProc(10)
+#
+m = Magic("Beach","beach")
+m.newDmg(100)
+m.newTrigTag('abyssal')
+m.newDmg(100)
+m.newTrigTag('aquatic')
+m.newDmg(100)
+m.newTrigTag('terror')
+m.newDmg(100)
+m.newTrigTag('insect')
+m.newDmg(100)
+m.newProc(10)
+#
+m = Magic("Annus Mirabilis","AM")
+m.newDmg(34)
+m.newProc(12)
+#
+m = Magic("Begone, Fiends!","BF")
+m.newTrigTag('demon')
+m.newDmg(150)
+m.newProc(5)
+m.newTrigTag('demon')
+m.newTrig('spellcast',"Hell's Knell")
+m.newDmg(210)
+m.newProc(2)
+m.newTrigTag('demon')
+m.newTrig('spellcast',"Hell's Knell")
+m.newDmg(210)
+m.newProc(2)
+#
+m = Magic("Blood Moon","BM")
+#   Wants to check for three different generals. No way.
+m.newDmg(100)
+m.newTrig('spellowned',"Glimmering Moon")
+m.newDmg(50)
+m.newTrigTag('human')
+m.newDmg(100)
+m.newProc(10)
+#
+m = Magic("Bramblewire Trap","BT")
+#   Checks for Battle-Scarred set and others. Wow. No. Not just no, but hell no.
+m.newDmg(60)
+m.newTrigTag('goblin')
+m.newDmg(200)
+m.newTrigTag('nightmarequeen')
+m.newDmg(200)
+m.newProc(10)
+#
+m = Magic("Briseis' Blessing","BB")
+m.newDmg(1)
+m.newTrig('spellcast',"Chryseis' Kiss")
+m.newTrigTag('dragon')
+m.newDmg(200)
+m.newProc(5)
+#
+m = Magic("Burning Rain","BR")
+m.newDmg(3)
+m.newProc(100)
+#
+m = Magic("Cast Down","CD")
+m.newTrigTag('dragon')
+m.newDmg(125)
+m.newTrigTag('demon')
+m.newDmg(175)
+m.newProc(14)
+#
+m = Magic("Celestial Catapult","CC")
+m.newDmg(5)
+m.newTrig('spellcast',"Infernal Bombardment")
+m.newTrigTag('siege')
+m.newDmg(200)
+m.newProc(5)
+#
+m = Magic("Consume","cons")
+#   Most of the damage comes from checking if Burut the Hungry is owned, and if
+#   the other mounts from Horn of Plenty is owned. This is such a thing, so
+#   let's just assume you own it all if you have the magic. It'll be cheaper.
+m.newDmg(120)
+m.newTrig('spellowned',"Consume") #workaround
+m.newDmg(40+5*(5*3))
+m.newProc(15)
+#
+m = Magic("Corpse Explosion","CEx")
+m.newTrigTag('undead')
+m.newDmg(250)
+m.newTrig('spellcast',"Holy Nova")
+m.newTrigTag('undead')
+m.newDmg(175)
+m.newTrig('spellcast',"Soul Pilferer")
+m.newTrigTag('undead')
+m.newDmg(175)
+m.newProc(15)
+#
+
+
 
 
 
@@ -672,6 +831,8 @@ m.newProc(13)
 '''
 m = Magic("","")
 m.newDmg()
+m.newTrig('spellcast',"")
+m.newTrig('spellowned',"")
 m.newTrigTag('')
 m.newDmg()
 m.newProc()
@@ -705,7 +866,11 @@ for idx,i in enumerate(range(SLOTNUM+5)):
     avg   = NEWMAGICS[i][1]
     if idx==SLOTNUM: print "-------------"
     print str(spell.fullname)+": "+str(avg)
-    shortlist += spell.nickname+","
+    shortlist += spell.nickname
+    if idx==(SLOTNUM-1):
+        shortlist += ';'
+    else:
+        shortlist += ','
 print "-------------"
 print "Short list:"
 shortlist = shortlist[:-1]
