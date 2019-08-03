@@ -42,7 +42,9 @@ if EXTRAFUNC == 'showparams':
 
 ''' Class documentation: Magic()
     Uses a reverse-creation scheme.
-    0.  Instantiate a Magic() class with fullname and nickname.
+    0.  Instantiate a Magic() class with fullname and nickname. All the really
+        important stuff is stored in class variables so any instance you make
+        doesn't need to persist past setting up that particular magic.
     1.  Define triggers for a proc. All triggers per damage proc must match
         before damage for that proc is processed
     2.  Define damage for previously defined triggers. Doing this flushes the
@@ -535,7 +537,7 @@ m.newTrigTag('magicalcreature')
 m.newDmg(400)
 m.newProc(10)
 #
-m = Magic("Fey Flame","FF")
+m = Magic("Fey Flame","fey")
 #   This checks for Kindly Folk set. We're not going to do that.
 m.newDmg(25)
 m.newDmg( lambda : OWNED['MAGICALBEINGTROOPS'] + OWNED['MAGICALBEINGGENERALS'] )
@@ -601,7 +603,67 @@ m.newDmg(400)
 m.newTrigTag(['human','beastman']) #OR CONDITION
 m.newDmg(140)
 m.newProc(20)
-
+#
+m = Magic("Electrify","elec")
+m.newDmg(75)
+m.newTrigTag('abyssal')
+m.newDmg(200)
+m.newTrigTag('insect')
+m.newDmg(350)
+m.newProc(10)
+#
+m = Magic("Crushing Pressure","CP")
+m.newDmg(50)
+m.newTrig('spellcast','Boil')
+m.newDmg(20)
+m.newTrig('spellcast','Feeding Frenzy')
+m.newDmg(20)
+m.newTrig('spellcast','Deep Freeze')
+m.newDmg(20)
+m.newTrigTag('aquatic')
+m.newDmg(50)
+m.newTrigTag('terror')
+m.newDmg(300)
+m.newProc(10)
+#
+m = Magic("Boil","boil")
+#   Checks if five particular generals are owned. No way we're doing that.
+m.newDmg(50)
+m.newTrigTag('aquatic')
+m.newDmg(250)
+m.newProc(11)
+#
+m = Magic("Feeding Frenzy","FF")
+#   Checks for ownership of Monster Fisherman and Fish Hooks. Not doing that.
+#   Since its damage is so significant, we'll do the cheap way out and simply
+#   check if you own the magic. If you own it, you'll likely own the others.
+m.newDmg(50)
+m.newTrig('spellowned',"Feeding Frenzy")
+m.newDmg(50+25*5)
+m.newTrigTag('aquatic')
+m.newDmg(100)
+m.newProc(9)
+#
+m = Magic("Enraged Feeding Frenzy","EFF")
+#   Checks for ownership of Monster Fisherman and Fish Hooks. Not doing that.
+#   Since its damage is so significant, we'll do the cheap way out and simply
+#   check if you own the magic. If you own it, you'll likely own the others.
+m.newDmg(50)
+m.newTrig('spellowned',"Enraged Feeding Frenzy")
+m.newDmg(100+30*5)
+m.newTrigTag('aquatic')
+m.newDmg(300)
+m.newProc(10)
+#
+m = Magic("Deep Freeze","deep")  #avoiding name collision with Dark Forest
+#   This checks for a bunch of guild stuff. Let's cheat and say that if you own
+#   the magic, you'll probably have tortured yourself into getting the rest too.
+m.newDmg(50)
+m.newTrig('spellowned',"Deep Freeze")
+m.newDmg(10*4+15*3)
+m.newTrigTag('aquatic')
+m.newDmg(100)
+m.newProc(13)
 
 
 
