@@ -71,6 +71,11 @@ Known Issues
   via manual calculation or by removing their effect altogether (as it's not
   expected many, if any, will meet those requirements). Those simplifications
   are noted with the magic definition.
+* Magics that are heavily reliant on other cast magics, such as the Enigma type
+  magic, may show up incorrectly in some cases due to list extension. This
+  very problem is why I don't broadly share this utility, and it's not an easy
+  one to solve. This can be partially mitigated by changing the `MAGICLIST_EXTEND`
+  variable in the script to a lower number
 
 License
 -------

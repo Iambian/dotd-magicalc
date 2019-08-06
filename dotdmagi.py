@@ -15,6 +15,7 @@ SHOWDEBUG = False
 USERAREMAGIC = False
 RAIDTAGS = sys.argv[2:]
 MAGICLIST = []
+MAGICLIST_EXTEND = 3
 
 OWNED = {
     'MOUNTS':400,
@@ -852,7 +853,7 @@ for i in Magic.spelllist:
     if SHOWDEBUG: print "Magic: "+str(i.nickname)+", avg dmg: "+str(avg)
 #Sort ALLMAGICS and skim off top into MAGICLIST to start calc for NEWMAGICS
 ALLMAGICS = sorted(ALLMAGICS,key = lambda x: x[1],reverse = True)
-MAGICLIST = copy.deepcopy(ALLMAGICS[:SLOTNUM+5])
+MAGICLIST = copy.deepcopy(ALLMAGICS[:SLOTNUM+MAGICLIST_EXTEND])
 NEWMAGICS = []
 for i,oavg in MAGICLIST:
     avg = i.getAvg()
@@ -861,7 +862,7 @@ NEWMAGICS = sorted(NEWMAGICS,key = lambda x: x[1],reverse = True)
 #And now we should have a roughly optimized table.
 
 shortlist = ""
-for idx,i in enumerate(range(SLOTNUM+5)):
+for idx,i in enumerate(range(SLOTNUM+MAGICLIST_EXTEND)):
     spell = NEWMAGICS[i][0]
     avg   = NEWMAGICS[i][1]
     if idx==SLOTNUM: print "-------------"
