@@ -61,6 +61,11 @@ they appear in-game, including capitalization and punctuation.
 Known Issues
 ------------
 
+* Some abbreviations listed aren't actually used by the community at large. This
+  is either because I don't know them, or there's another spell with the same
+  abbreviation. For technical reasons, abbreviation collision results in
+  unpredictable behavior if you try to use them in the script, and I don't want
+  that. At all.
 * All tags had their spaces stripped to form a single word for each. This is a 
   limitation of the command-line interface without needing to use a bunch of quotes
 * All tags are also lowercase. Searches are case-sensitive and if you include any
