@@ -21,6 +21,7 @@ OWNED = {
     'MOUNTS':400,
     'LEGIONS':100,
     'TROOPS':200,
+    'GENERALS':100,
     ## number of magics owned. This value holds priority over length of SPELLS
     'MAGICS':30,
     ## SPELLS shows exactly what magics you own.
@@ -34,6 +35,8 @@ OWNED = {
     'DWARFGENERALS':18,
     'MAGICALBEINGTROOPS':10,
     'MAGICALBEINGGENERALS':10,
+    'OROCTROOPS':10,
+    'OROCGENERALS':5,
     'DRAGONESSENCE':10,
     'DRAGONMOUNTS':20,
     "KATH'IN":False,   #For Fury of the Deep, since owning this gen affects it greatly.
@@ -68,7 +71,6 @@ if EXTRAFUNC == 'showparams':
     'spellcast':    Matches against whether or not a spell is previously cast.
                     This allows an optimiation via iteration of magic assembly.
     'spellowned':   Matches against spells in the ownership static list
-
 '''
 
 
@@ -346,9 +348,12 @@ m = Magic("Burning Rain","BR")
 m.newDmg(3)
 m.newProc(100)
 #
+'''
 m = Magic("Buster 2.0","B2")
-m.newDmg(10000000000)
-m.newProc(0) # ...
+m.setrare()
+m.newDmg(float('nan'))
+m.newProc(float('nan')) # ...
+'''
 #
 m = Magic("Cast Down","CD")
 m.newTrigTag('dragon')
@@ -980,42 +985,20 @@ m.newDmg(3)
 m.newProc(100)
 # Omitted Mad Marcia's Momentary Massacre for same reason as Battousai
 #
+'''
 m = Magic("Magic Torch","torch") ## haha
-m.newDmg(0)
-m.newProc(0)
-#
+m.newDmg(float('nan'))
+m.newProc(float('nan'))
+'''
+#Assumes you own 50 sleepless soldiers
 m = Magic("Manifest Dread","MD")
-m.newDmg()
-m.newTrig('spellcast',"")
-m.newTrig('spellowned',"")
-m.newTrigTag('')
-m.newDmg()
-m.newProc()
-
-
-
-
-
-
-
-
-
-
-#   This magic define does not account for infinite dawn set ownership.
-#   Any increase in this case will be negligible.
-m = Magic("Mark of the Infinite Dawn","MID")
-m.newDmg(1980)
-m.newTrigTag('dragon')
-m.newDmg(590)
-m.newTrigTag('worldraid')
-m.newDmg(590)
-m.newTrigTag('eventraid')
-m.newDmg(590)
-m.newTrigTag('elite')
-m.newDmg(590)
-m.newTrigTag('deadly')
-m.newDmg(590)
-m.newProc(5)
+m.newDmg(50)
+m.newDmg(3*50)
+m.newTrigTag('magicalcreature')
+m.newDmg(150)
+m.newTrigTag('nightmarequeen')
+m.newDmg(150)
+m.newProc(10)
 #
 m = Magic("Manticore Venom","MV")
 m.newDmg(100)
@@ -1036,12 +1019,119 @@ m.newDmg(25)
 m.newTrigTag('beast')
 m.newDmg(250)
 m.newProc(5)
+#Counts number of griffin champions owned. not doing that. (2*100)
+m = Magic("Mark of the Griffin","MG")
+m.newDmg(25)
+m.newTrig('spellowned',"Mark of the Griffin")
+m.newDmg(25)
+m.newTrigTag('blackhand')
+m.newDmg(300)
+m.newTrigTag('war')
+m.newDmg(300)
+m.newProc(10)
+#   This magic define does not account for infinite dawn set ownership.
+#   Any increase in this case will be negligible.
+m = Magic("Mark of the Infinite Dawn","MID")
+m.newDmg(1980)
+m.newTrigTag('dragon')
+m.newDmg(590)
+m.newTrigTag('worldraid')
+m.newDmg(590)
+m.newTrigTag('eventraid')
+m.newDmg(590)
+m.newTrigTag('elite')
+m.newDmg(590)
+m.newTrigTag('deadly')
+m.newDmg(590)
+m.newProc(5)
+#
+m = Magic("Mark of the Raven's Wing","MRW")
+m.newDmg(50)
+m.newTrig('spellcast',"Shadowstep")
+m.newDmg(25)
+m.newTrig('spellowned',"Shadowstep")
+m.newDmg(50)
+m.newTrigTag('demon')
+m.newDmg(50)
+m.newProc(20)
+#
+m = Magic("Master of Monsters","MoM")
+m.newDmg(90)
+m.newDmg( lambda : math.floor(OWNED['MOUNTS'] / 5) )
+m.newTrig('spellcast',"Beastmaster")
+m.newDmg(80)
+m.newTrig('spellcast',"Khan's Gift")
+m.newDmg(80)
+m.newProc(8)
+#
+m = Magic("Melinda's Magekiller","mel")
+m.newDmg(90)
+m.newTrig('spellcast',"Annus Mirabilis")
+m.newDmg(30)
+m.newProc(5)
+#
+m = Magic("Melt","melt")
+m.newTrigTag('winter')
+m.newDmg(200)
+m.newTrigTag('dragon')
+m.newDmg(200)
+m.newProc(10)
+#
+m = Magic("Midas' Touch","MT")
+m.newDmg(0)
+m.newProc(100)
+#
+m = Magic("Morituri Te Salutant","MTS")
+m.newDmg(10)
+m.newProc(17)
+#It wants to know if you own Sir Jorim. I don't. (10)
+m = Magic("Mystic Slaughterers","MS")
+m.newDmg(10)
+m.newTrig('spellcast',"Veil Dust")
+m.newDmg(10)
+m.newTrigTag('magicalcreature')
+m.newDmg(50)
+m.newProc(100)
+#
+m = Magic("Nela's Kiss","NK")
+m.newDmg(60)
+m.newTrig('spellcast',"Lesser Poison")
+m.newDmg(6)
+m.newTrig('spellcast',"Poison")
+m.newDmg(15)
+m.newTrig('spellcast',"Greater Poison")
+m.newDmg(30)
+m.newProc(10)
+#
+m = Magic("Nightmare","NM")
+m.newTrigTag('nightmarequeen')
+m.newDmg(250)
+m.newTrigTag('nightmarequeen')
+m.newTrig('spellcast',"Survivor")
+m.newDmg(100)
+m.newTrigTag('nightmarequeen')
+m.newTrig('spellcast',"Bramblewire Trap")
+m.newDmg(100)
+m.newTrigTag('nightmarequeen')
+m.newTrig('spellcast',"Quicksand Pit")
+m.newDmg(100)
+m.newProc(11)
 #
 m = Magic("Noxious Breath","NB")
 m.newDmg(400)
 m.newTrigTag(['human','beastman']) #OR CONDITION
 m.newDmg(140)
 m.newProc(20)
+#
+m = Magic("Obedience","obe")
+m.newDmg(100)
+m.newDmg( lambda : 2 * math.floor(OWNED['GENERALS'] / 100) )
+m.newTrig('spellowned',"Clarion Call")
+m.newDmg(50)
+m.newTrig('spellowned',"Obedience")
+m.newDmg(50)
+m.newTrig('spellcast',"")
+m.newProc(15)
 #
 m = Magic("Pestilent Bolt","PB")
 m.newDmg(550)
@@ -1050,9 +1140,62 @@ m.newTrig('spellcast',"Pestilent Bolt")
 m.newDmg(170)
 m.newProc(15)
 #
+m = Magic("Pillar of Light","PoL")
+m.newDmg(100)
+m.newTrig('spellowned',"Pillar of Light")
+m.newDmg(100)
+m.newTrigTag('demon')
+m.newDmg(300)
+m.newProc(15)
+#
+#
 m = Magic("Poison","P")
 m.newDmg(4)
 m.newProc(7)
+#
+m = Magic("Possession","pos")
+m.newTrigTag('demon')
+m.newDmg(125)
+m.newTrigTag('demon')
+m.newTrig('spellcast',"Hell's Knell")
+m.newDmg(25)
+m.newTrigTag('demon')
+m.newTrig('spellcast',"Begone, Fiends!")
+m.newDmg(25)
+m.newTrigTag('demon')
+m.newTrig('spellcast',"Exorcism")
+m.newDmg(25)
+m.newProc(9)
+#
+m = Magic("Power Leech","PL")
+m.newDmg(75)
+m.newTrigTag('orc')
+m.newDmg(150)
+m.newTrigTag('ogre')
+m.newDmg(150)
+m.newTrigTag('goblin')
+m.newDmg(150)
+m.newProc(10)
+# There might be a problem with the procs on this one due to the wording
+# indicating that a spell needs to be cast or owned for a single 25% dmg proc
+# to trigger. I have no idea how to deal with this right now.
+m = Magic("Purify","puri")
+m.newDmg(100)
+m.newTrigTag('demon')
+m.newDmg(500)
+m.newTrig('spellcast',"Mark of the Raven's Wing")
+m.newDmg(25)
+m.newTrig('spellcast',"Shadowstep")
+m.newDmg(25)
+m.newTrig('spellcast',"Inspire")
+m.newDmg(25)
+m.newTrig('spellowned',"Mark of the Raven's Wing")
+m.newDmg(25)
+m.newTrig('spellowned',"Shadowstep")
+m.newDmg(25)
+m.newTrig('spellowned',"Inspire")
+m.newDmg(25)
+m.newProc(5)
 #
 m = Magic("Putrid Swamp","PS")
 m.newDmg(825)
@@ -1066,6 +1209,45 @@ m.newTrigTag(['human','beastman']) #OR CONDITION
 m.newTrig('spellcast',"Noxious Breath")
 m.newDmg(125)
 m.newProc(10)
+#
+m = Magic("Quicken Mind","QM")
+m.newDmg(0)
+m.newProc(100)
+# Wants pieces of Battle-Scarred set (+3). Not going to do that. (10*12)
+m = Magic("Quicksand Pit","QSP")
+m.newDmg(60)
+m.newTrigTag('ogre')
+m.newDmg(200)
+m.newTrigTag('nightmarequeen')
+m.newDmg(200)
+m.newProc(10)
+#
+m = Magic("Qwil-Killer Fury","QKF")
+m.newDmg(60)
+m.newTrigTag('qwiladrian')
+m.newDmg(150)
+m.newProc(11)
+#
+m = Magic("Rage of the Twilight","RT")
+m.newDmg(50)
+m.newDmg( lambda : 2 * (OWNED['OROCTROOPS'] + OWNED['OROCGENERALS'] ) )
+m.newTrigTag('demon')
+m.newDmg(100)
+m.newProc(10)
+#
+m = Magic("Raging Blizzard","RB")
+m.newDmg(5)
+m.newProc(100)
+#
+m = Magic("Raise Dead","RD")
+m.newDmg(200)
+m.newTrig('spellowned',"Raise Dead")
+m.newDmg(100)
+m.newTrigTag('demon')
+m.newDmg(100)
+m.newTrigTag('dragon')
+m.newDmg(100)
+m.newProc(10)
 #   This wants you to calc for # of Spirit Raven set pieces owned. Not doing it.
 m = Magic("Rally","rally")
 m.newTrigTag('guild')
@@ -1073,11 +1255,69 @@ m.newDmg(120)
 m.newTrig('spellcast',["Unity","Deathmark","Volatile Runes"])
 m.newDmg(200)
 m.newProc(6)
+#
+m = Magic("Reflection","ref")
+m.newDmg(10)
+m.newProc(20)
+#
+m = Magic("Remove Spirit","RS")
+m.newTrigTag('dragon')
+m.newDmg(125)
+m.newTrigTag('undead')
+m.newDmg(125)
+m.newProc(14)
+# Wants Resurrection set pieces (+3). Not doing it. (10*12)
+m = Magic("Resurrect","res")
+m.newDmg(75)
+m.newTrig('spellowned',"Resurrect")
+m.newDmg(75)
+m.newTrigTag('undead')
+m.newDmg(250)
+m.newProc(10)
+#Proc chance increases by 10 if Blazing Sun is cast. We don't have a way to
+#actually do that, so we just blend it in as a part of proc damage. Maths.
+m = Magic("Sandstorm","sand")
+m.newDmg(15)
+m.newTrig('spellcast',"Blazing Sun")
+m.newDmg(20)
+m.newProc(26)
+# Wants to count Battle-Scarred set (+3). Not doing it. (10*12)
+m = Magic("Sap Energies","sap")
+m.newDmg(60)
+m.newTrigTag('nightmarequeen')
+m.newDmg(200)
+m.newProc(10)
 ## SM changed to SaM to avoid collision with Shattered Moon
 m = Magic("Savage Melodies","SaM")  
 m.newTrigTag('giant')
 m.newDmg(500)
 m.newProc(20)
+#
+m = Magic("Scorched Earth","SE")
+m.newDmg(100)
+m.newTrig('spellcast',"Power Leech")
+m.newDmg(200)
+m.newTrigTag('goblin')
+m.newDmg(80)
+m.newTrigTag('orc')
+m.newDmg(80)
+m.newTrigTag('ogre')
+m.newDmg(80)
+m.newProc(9)
+#Due to those chests from Dark Cathedral campaign, just assume that if you own
+#this magic, you have all seven of those colorful generals. Cheap, but okay.
+m = Magic("Seven Unyielding","7U")
+m.newDmg(95)
+m.newTrig('spellowned',"Seven Unyielding")
+m.newDmg(7*15)
+m.newProc(8)
+#Shadow Strike was omitted due to same reasons as Battousai
+#Shadowstep wants Shadow-Slip Assassin set. I don't. (15*9)
+m = Magic("Shadowstep","SS")
+m.newDmg(50)
+m.newTrigTag('demon')
+m.newDmg(120)
+m.newProc(10)
 #   This checks if Ying of the Shattered Moon is owned. We're not doing that.
 m = Magic("Shattered Moon","SM")
 m.newDmg(200)
@@ -1085,6 +1325,26 @@ m.newTrig('spellowned','Shattered Moon')
 m.newDmg(100)
 m.newTrigTag('human')
 m.newDmg(750)
+m.newProc(10)
+# This wants pieces of Wee Warrior set. I say... no. (10*9)
+m = Magic("Shrink","shrink")
+m.newDmg(100)
+m.newTrig('spellowned',"Shrink")
+m.newDmg(100)
+m.newTrigTag('giant')
+m.newDmg(350)
+m.newProc(10)
+# Wants pieces of Brute Strength set. Not doing it. (5*9)
+m = Magic("Siphon Strength","siphon")
+m.newDmg(100)
+m.newTrig('spellowned',"Siphon Strength")
+m.newDmg(45)
+m.newTrigTag('goblin')
+m.newDmg(200)
+m.newTrigTag('orc')
+m.newDmg(200)
+m.newTrigTag('ogre')
+m.newDmg(200)
 m.newProc(10)
 #   This magic also checks for those gauntlet trophies. Not doing that here.
 m = Magic("SMITE","SMITE")
@@ -1101,6 +1361,38 @@ m.newTrigTag('undead')
 m.newTrig('spellcast',"Gravebane")
 m.newDmg(400)
 m.newProc(15)
+# It wants pieces of the Warrior Poet set. No. (9*5)
+m = Magic("Stanzas of Slaughter","SoS")
+m.newDmg(120)
+m.newTrig('spellcast',"Harmony")
+m.newDmg(50)
+m.newTrig('spellcast',"Discord")
+m.newDmg(50)
+m.newProc(9)
+# Wants pieces of the Battle-Scarred set (+3). No. (10*12)
+m = Magic("Survivor","surv")
+m.newDmg(60)
+m.newTrigTag('orc')
+m.newDmg(200)
+m.newTrigTag('nightmarequeen')
+m.newDmg(200)
+m.newProc(10)
+# Let's assume, due to the proliferation of those Chest of Ages things that
+# if you own the magic, you have all the pieces of the Rising Dawn set.
+m = Magic("Sword of Light","SoL")
+m.newDmg(100)
+m.newTrig('spellowned',"Sword of Light")
+m.newDmg(15*9)
+m.newTrigTag('dragon')
+m.newDmg(150)
+m.newProc(10)
+# Proc chance increases by 3% on match. Goodness gracious. More math 
+m = Magic("Terracles' Blessing","TB")
+m.newDmg(48)
+m.newTrig('spellcast',"Lyria's Swiftness")
+m.newTrigTag('dragon')
+m.newDmg(12)  #simulation of +3% proc rate
+m.newProc(12)
 #
 m = Magic("Titan Killer","TK")
 m.newDmg(200)
@@ -1142,6 +1434,10 @@ m.newTrigTag('guild')
 m.newDmg(300)
 m.newProc(20)
 #
+m = Magic("Vampiric Aura","VA")
+m.newDmg(12)
+m.newProc(15)
+#
 m = Magic("Veil Dust","VD")
 m.newDmg(300)
 m.newTrig('spellowned',"Veil Dust")
@@ -1151,6 +1447,13 @@ m.newDmg(50)
 m.newTrigTag('magicalcreature')
 m.newDmg(400)
 m.newProc(10)
+# Assumes you own all six (?) pieces of Violet Knight set if you have the magic
+# due to DC campaign loot
+m = Magic("Violet Storm","VS")
+m.newDmg(90)
+m.newTrig('spellowned',"Violet Storm")
+m.newDmg(5*6)
+m.newProc(5)
 #   This counts Depth Terror set. We're not doing that.
 m = Magic("Visions of the Deep","VotD")
 m.newDmg(500)
@@ -1181,6 +1484,7 @@ m.newTrigTag('dragon')
 m.newTrig('spellcast',"High Seas Enigma")
 m.newDmg(200)
 m.newProc(11)
+#Omitting Web of Aeons for much the same reason as I omitted Battousai
 #
 m = Magic("Weightlessness","weight")
 m.newDmg(100)
@@ -1197,6 +1501,13 @@ m.newDmg(250)
 m.newTrigTag('dragon')
 m.newDmg(250)
 m.newProc(20)
+#
+'''
+m = Magic("Wish","wish")
+m.setrare()
+m.newDmg(float('NaN'))
+m.newProc(float('NaN'))
+'''
 #
 m = Magic("Wolpertinger Venom","WV")
 m.newDmg(15)
@@ -1217,6 +1528,26 @@ m.newDmg(30)
 m.newTrig('spellowned',"Manticore Venom")
 m.newDmg(30)
 m.newProc(20)
+## PLATFORM-SPECIFIC MAGICS. COLLECTING THEM ALL UNDER A
+## SINGLE NAME AND EXPECTING USERS TO JUST KNOW WHAT
+## THESE MAGICS ARE FOR THEIR RESPECTIVE PLATFORMS
+m = Magic("[LV 2500]","#1#")
+m.newDmg(1000)
+m.newProc(1)
+#
+m = Magic("[LV 5000]","#2#")
+m.newDmg(1200)
+m.newProc(1)
+# Wants to know if you own Legend of the Demigod. I'm tempted to add it but...
+# neh. Not going to.
+m = Magic("[LV 10,000]","#3#")
+m.newDmg(30)
+m.newProc(100)
+#
+m = Magic("[LV 20,000]","#4#")
+m.newDmg(50)
+m.newDmg( lambda : math.floor(OWNED['MAGICS'] / 3) )
+m.newProc(100)
 
 
 

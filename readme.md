@@ -58,8 +58,8 @@ their full name. You should probably use the full name, as they are exactly as
 they appear in-game, including capitalization and punctuation.
 
 
-Known Issues
-------------
+Known Issues (Script)
+---------------------
 
 * Some abbreviations listed aren't actually used by the community at large. This
   is either because I don't know them, or there's another spell with the same
@@ -81,6 +81,45 @@ Known Issues
   very problem is why I don't broadly share this utility, and it's not an easy
   one to solve. This can be partially mitigated by changing the `MAGICLIST_EXTEND`
   variable in the script to a lower number
+  
+Known Issues (Magic)
+---------------------
+* Battousai, Brough's Trick, Leprechaun's Luck, Mad Marcia's Momentary Massacre, 
+  Shadow Strike, and Web of Aeons were omitted (not entered as comparable entries)
+  due to requiring additional imput (such as raid time remaining) which would've
+  made things both awkward and cumbersome.
+* Haste was also omitted because it touches things I didn't want to touch, not 
+  even with a ten foot pole
+* Buster 2.0, Magic Torch, and Wish were also omitted. For different reasons, but
+  they all boil down to either being unavailable or unusable (for the purpose of
+  damage debuffing a raid)
+* Blessing of Mathala, Blood Moon, Boil, Bramblewire Trap, Conflagration, Corrode,
+  Desiccate, Djinnpocalypse, Dune Tears, Fearless Advance, Fey Flame, Free Will,
+  From Iirhine With Love, Hailstorm, Inspire, Intoxicate, Invasive Growth, Judgement,
+  Levitate, Lightning Rod, Mark of the Griffin, Mark of the Infinite Dawn, Shadowstep,
+  Mystic Slaughterers, Quicksand Pit, Rally, Resurrect, Sap Energies,
+  Shattered Moon, Shrink, Siphon Strength, SMITE, Soul Pilferer, Stanzas of Slaughter,
+  Survivor, Visions of the Deep, and [That magic you get at lv 10,000 whose name depends
+  on the platform you play] ... all want to check on pieces of equipment that I
+  refuse to add to the `OWNED` dictionary, lest it get cluttered by things and confuse
+  anyone wanting to edit it. Also, these are things that a typical player won't be
+  expected to own and in many cases, don't make too much of a difference in the face
+  of all the recent overpowred magics. These procs were nixed.
+* Beastmaster, Consume, Deep Freeze, Doorway, Enraged Feeding Frenzy, Eternal Sight,
+  Exorcism, Fatal Aim, Feeding Frenzy, Guster's Fault, Hemorrhage, Insanity Laughs,
+  Manifest Dread, Seven Unyielding, Sword of Light, and Violet Storm had procs that
+  were simplified by assuming certain things. Most of these assumes that if you
+  own the magic, then you also likely own all the other parts that makes the magic
+  more powerful. These procs were precalculated and added on as per their normal
+  trigger conditions.
+* Sandstorm and Terracles' Blessing have procs that modify the proc rate instead
+  of simply adding more damage. The current system can't do that without a bit
+  of rethinking things, so I did some math to simulate what extra damage it would
+  do and then apply that instead.
+* Purify has a problem because I can't do an OR-type operation with procs that
+  share a single proc damage value with the current setup. I just made it so
+  each condition adds their own proc value to the bunch. Haven't figured out a
+  real workaround yet.
 
 License
 -------
@@ -89,3 +128,5 @@ It's the MIT License. See `LICENSE` for more details.
 Version History
 ---------------
 * 0.1 - First release. Seems to largely work
+* 0.2 - After some revisions and a lot of magic addons, the magic list is as
+        complete as I want it to be. For now.
