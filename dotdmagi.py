@@ -126,9 +126,13 @@ class Magic(object):
         
     @classmethod
     def sortMagic(cls):
-        global SLOTNUM,EXTRAFUNC
-        if EXTRAFUNC == "pessimal": sortdir = False
-        else:                       sortdir = True
+        global SLOTNUM,EXTRAFUNC,MAGICLIST_EXTEND
+        if EXTRAFUNC == "pessimal":
+            sortdir = False
+            SLOTNUM = 13
+            MAGICLIST_EXTEND = 0
+        else:
+            sortdir = True
         Magic.collateAverage(0)
         Magic.spelllist.sort(reverse=sortdir)
         Magic.collateAverage(SLOTNUM + MAGICLIST_EXTEND)
@@ -142,10 +146,10 @@ class Magic(object):
         return 0
         
     def getAvg(self):
-        global RAIDTAGS,OWNED,USERAREMAGIC,SHOWDEBUG,SLOTNUM
+        global RAIDTAGS,OWNED,USERAREMAGIC,SHOWDEBUG,SLOTNUM,EXTRAFUNC
         curproctotal = 0
         if self.israre and not USERAREMAGIC:
-            return 0
+            return 9999 if EXTRAFUNC == 'pessimal' else 0
         #print "Proclist: "+str(self.proclist)
         for procs in self.proclist:
             procrate = procs[0]
@@ -1252,6 +1256,7 @@ m.newProc(10)
 m = Magic("Rally","rally")
 m.newTrigTag('guild')
 m.newDmg(120)
+m.newTrigTag('guild')
 m.newTrig('spellcast',["Unity","Deathmark","Volatile Runes"])
 m.newDmg(200)
 m.newProc(6)
