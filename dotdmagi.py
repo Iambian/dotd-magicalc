@@ -149,7 +149,7 @@ class Magic(object):
         global RAIDTAGS,OWNED,USERAREMAGIC,SHOWDEBUG,SLOTNUM,EXTRAFUNC
         curproctotal = 0
         if self.israre and not USERAREMAGIC:
-            return 9999 if EXTRAFUNC == 'pessimal' else 0
+            return float('inf') if EXTRAFUNC == 'pessimal' else 0
         #print "Proclist: "+str(self.proclist)
         for procs in self.proclist:
             procrate = procs[0]
@@ -366,7 +366,7 @@ m.newTrigTag('demon')
 m.newDmg(175)
 m.newProc(14)
 #
-m = Magic("Celestial Catapult","CC")
+m = Magic("Celestial Catapult","cata")
 m.newDmg(5)
 m.newTrig('spellcast',"Infernal Bombardment")
 m.newTrigTag('siege')
@@ -400,12 +400,13 @@ m.newTrig('spellowned',"Obedience")
 m.newDmg(25)
 m.newProc(10)
 #   Checks for Incinerated Soldiers owned. We aren't doing that here.
+#   Apparently, "Living Flame" is an armament, not a spell. Not checking.
 m = Magic("Conflagration","conf")
 m.newTrigTag('winter')
 m.newDmg(100)
-m.newTrigTag('winter')
-m.newTrig('spellowned','Living Flame')
-m.newDmg(100)
+#m.newTrigTag('winter')
+#m.newTrig('spellowned','Living Flame')
+#m.newDmg(100)
 m.newTrigTag('winter')
 m.newTrig('spellcast','Flame Serpent')
 m.newDmg(150)
@@ -701,7 +702,7 @@ m.newProc(10)
 #
 m = Magic("Fireworks","fire")
 m.newDmg(75)
-m.newTrig('spellowned',"")
+m.newTrig('spellowned',"Fireworks")
 m.newDmg(75)
 m.newTrigTag('magicalcreature')
 m.newDmg(250)
@@ -1014,7 +1015,7 @@ m.newTrig('spellowned',"Dragon's Breath")
 m.newDmg(100)
 m.newTrig('spellowned',"Poison")
 m.newDmg(25)
-m.newTrig('spellowned',"Greate Poison")
+m.newTrig('spellowned',"Greater Poison")
 m.newDmg(25)
 m.newTrig('spellowned',"Lesser Poison")
 m.newDmg(25)
@@ -1557,6 +1558,86 @@ m.newProc(100)
 
 
 
+if EXTRAFUNC=='selftest':
+    ## Check for duplicate (fullname) entries
+    allpass = True
+    testpass = True
+    for spell in Magic.spelllist:
+        found = 0
+        name1 = spell.fullname
+        for spcmp in Magic.spelllist:
+            if name1 == spcmp.fullname:
+                found += 1
+        if found>1:
+            testpass = False
+            print "Spell fullname duplicate found in : "+str(spell.fullname)
+    if testpass:    print "No spell fullname duplicates."
+    else:           allpass = False
+    ## Check for nickname duplicates
+    testpass = True
+    for spell in Magic.spelllist:
+        found = 0
+        name1 = spell.nickname
+        for spcmp in Magic.spelllist:
+            if name1 == spcmp.nickname:
+                found += 1
+        if found>1:
+            testpass = False
+            print "Spell abbrevation duplicate found in : "+str(spell.fullname)
+    if testpass:    print "No spell abbreviation duplicates."
+    else:           allpass = False
+    ## Check all tags in all spells if they're correctly spelled / registered
+    registeredtags = ['underground','elite','deadly','worldraid','eventraid',
+        'dragon','demon','aquatic','qwiladrian','winter','siege','terror',
+        'insect','construct','goblin','orc','ogre','human','undead','beast',
+        'magicalcreature','nightmarequeen','shadowelf','blackhand','guild',
+        'festival','abyssal','beastman','plant','war','giant']
+    testpass = True
+    for spell in Magic.spelllist:
+        for procs in spell.proclist:
+            for proc in procs[1]:
+                triggers = proc[1]
+                if 'raidtag' in triggers:
+                    for tag in triggers['raidtag']:
+                        if tag not in registeredtags:
+                            print "Spell "+str(spell.fullname)+" has unregistered tag: "+str(tag)
+                            testpass = False
+    if testpass:    print "No unregistered raid tags in spells."
+    else:           allpass = False
+    ## Check all spellowned/spellcast triggers against names in spell database
+    testpass = True
+    for spell in Magic.spelllist:
+        for procs in spell.proclist:
+            for proc in procs[1]:
+                triggers = proc[1]
+                if 'spellcast' in triggers:
+                    for sname in triggers['spellcast']:
+                        if not Magic.getID(sname):
+                            print "Spell "+str(spell.fullname)+" has unregistered spellcast argument: "+str(sname)
+                            testpass = False
+                if 'spellowned' in triggers:
+                    for sname in triggers['spellowned']:
+                        if not Magic.getID(sname):
+                            print "Spell "+str(spell.fullname)+" has unregistered spellowned argument: "+str(sname)
+                            testpass = False
+    if testpass:    print "No unregistered spellcast/spellowned triggers in spells."
+    else:           allpass = False
+    ## Check OWNED['SPELLS'] to ensure that they also appear in magic database
+    testpass = True
+    for sname in OWNED['SPELLS']:
+        if not Magic.getID(sname):
+            print "Spell name or abbreviation in OWNED['SPELLS'] not registered: "+str(sname)
+            testpass = False
+    if testpass:    print "No unregistered spells in OWNED['SPELLS'] list."
+    else:           allpass = False
+    ## ... ... ...
+    ## ... ... ...
+    ## ... ... ...
+    if allpass:
+        print "PASS: All self-test functions completed without error."
+    else:
+        print "FAIL: Some self-test functions have produced an error."
+    sys.exit()
 
 
 
