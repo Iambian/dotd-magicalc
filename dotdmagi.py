@@ -42,6 +42,25 @@ OWNED = {
     "KATH'IN":False,   #For Fury of the Deep, since owning this gen affects it greatly.
     'SCULPTEDCRYSTAL':0,
     'HARVESTEDCRYSTAL':0,
+    ##
+    ## ok. i give. going to clutter up the space with set stuff now.
+    ##
+    'AUREATE_TROPHY':False,    #For gauntlet
+    'ARGENT_TROPHY':False,
+    'BRONZED_TROPHY':False,
+    'GEN_SMILING_SARAH':False, #For Blood Moon
+    'GEN_ZURK':False,
+    'GEN_KOLEMALU':False,
+    'GEN_RANINA':False,        #For Boil
+    'GEN_LAOCONS_GHOST':False,
+    'GEN_LORD_VERNE':False,
+    'GEN_CAPTAIN_TIPHANTES':False,
+    'GEN_FIRST_MATE_BRAEUS':False,
+    'SET_BATTLE_SCARRED':0,      #9 for set, +3 for other stuff that the spells want
+    'ARM_LIVING_FLAME':False,
+    'TRP_INCINERATED_SOLDIER':0, #Up to 50
+    'SET_ACIDIC_ARMOR':0,        #9 for set, +7 for other stuff wanted by Corrode
+    'SET_CURIOUS_CUIRASSIER':0,  #9 for set.
     
 }
 if EXTRAFUNC == 'showparams':
@@ -201,9 +220,6 @@ class Magic(object):
         return curproctotal
 ## ----------------------------- MAGIC DATA ENTRY --------------------------- ##
 #
-Magic("NULL_ENTRY","NULL_ENTRY")
-#
-#
 m = Magic("A Light in the Darkness","LitD")
 m.newDmg(40)
 m.newDmg( lambda : 15 * OWNED['UNDERGROUNDESSENCE'] )
@@ -254,8 +270,7 @@ m.newTrigTag('siege')
 m.newTrig('spellcast',"Weightlessness")
 m.newDmg(300)
 m.newProc(10)
-#Omitting Battousai. It has a raid condition we can't quantify without
-#requiring annoying extra inputs.
+## Omit Battousai. Meaningful results unobtainable without additional user input
 #
 m = Magic("Beach","beach")
 m.newDmg(100)
@@ -268,8 +283,7 @@ m.newDmg(100)
 m.newTrigTag('insect')
 m.newDmg(100)
 m.newProc(10)
-#Counts amounts of individual mounts owned. My god. No. Just assume we have
-#the maximal amount and call it a day.
+## SIMPLIFIED SPELL: Assume max individual mounts owned. Not hard to do.
 m = Magic("Beastmaster","beast")
 m.newDmg(40+(10000/100))
 m.newProc(3)
@@ -299,10 +313,13 @@ m.newDmg(0)
 m.newTrig('spellcast',"Glimmering Moon")
 m.newDmg(0)
 m.newProc(100)
-#   This magic checks for those gauntlet trophies. Not doing that here.
+#
 m = Magic("Blessing of Mathala","BoM")
 m.setrare()
 m.newDmg(850)
+m.newDmg(lambda : 50 * OWNED['AUREATE_TROPHY'])
+m.newDmg(lambda : 20 * OWNED['ARGENT_TROPHY'])
+m.newDmg(lambda :  5 * OWNED['BRONZED_TROPHY'])
 m.newTrig('spellowned',"BoM")
 m.newDmg(100)
 m.newProc(12)
@@ -317,23 +334,32 @@ m.newProc(10)
 m.newTrigTag('aquatic')
 m.newDmg(300)
 m.newProc(12)
-#   Wants to check for three different generals. No way.
+# 
 m = Magic("Blood Moon","BM")
 m.newDmg(100)
+m.newDmg( lambda : 20 * OWNED['GEN_SMILING_SARAH'])
+m.newDmg( lambda : 20 * OWNED['GEN_ZURK'])
+m.newDmg( lambda : 20 * OWNED['GEN_KOLEMALU'])
 m.newTrig('spellowned',"Glimmering Moon")
 m.newDmg(50)
 m.newTrigTag('human')
 m.newDmg(100)
 m.newProc(10)
-#   Checks if five particular generals are owned. No way we're doing that.
+#
 m = Magic("Boil","boil")
 m.newDmg(50)
+m.newDmg( lambda : 10 * OWNED['GEN_RANINA'])
+m.newDmg( lambda : 10 * OWNED['GEN_LAOCONS_GHOST'])
+m.newDmg( lambda : 10 * OWNED['GEN_LORD_VERNE'])
+m.newDmg( lambda : 10 * OWNED['GEN_CAPTAIN_TIPHANTES'])
+m.newDmg( lambda : 10 * OWNED['GEN_FIRST_MATE_BRAEUS'])
 m.newTrigTag('aquatic')
 m.newDmg(250)
 m.newProc(11)
-#   Checks for Battle-Scarred set and others. Wow. No. Not just no, but hell no.
+#
 m = Magic("Bramblewire Trap","BT")
 m.newDmg(60)
+m.newDmg( lambda : 10 * min(OWNED['SET_BATTLE_SCARRED'],12))
 m.newTrigTag('goblin')
 m.newDmg(200)
 m.newTrigTag('nightmarequeen')
@@ -346,7 +372,7 @@ m.newTrig('spellcast',"Chryseis' Kiss")
 m.newTrigTag('dragon')
 m.newDmg(200)
 m.newProc(5)
-#Omitting Brough's Trick for same reason as Battousai
+## Omitting Brough's Trick for same reason as Battousai
 #
 m = Magic("Burning Rain","BR")
 m.newDmg(3)
@@ -399,18 +425,19 @@ m.newDmg(25)
 m.newTrig('spellowned',"Obedience")
 m.newDmg(25)
 m.newProc(10)
-#   Checks for Incinerated Soldiers owned. We aren't doing that here.
-#   Apparently, "Living Flame" is an armament, not a spell. Not checking.
+#
 m = Magic("Conflagration","conf")
 m.newTrigTag('winter')
 m.newDmg(100)
-#m.newTrigTag('winter')
-#m.newTrig('spellowned','Living Flame')
-#m.newDmg(100)
+m.newTrigTag('winter')
+m.newDmg(lambda : 3 * min(OWNED['ARM_LIVING_FLAME'],50))
+m.newTrigTag('winter')
+m.newDmg(lambda : 100 * OWNED['ARM_LIVING_FLAME'])
 m.newTrigTag('winter')
 m.newTrig('spellcast','Flame Serpent')
 m.newDmg(150)
 m.newProc(25)
+## SIMPLIFIED SPELL
 #   Most of the damage comes from checking if Burut the Hungry is owned, and if
 #   the other mounts from Horn of Plenty is owned. This is such a thing, so
 #   let's just assume you own it all if you have the magic. It'll be cheaper.
@@ -436,10 +463,10 @@ m.newTrig('spellcast',"Soul Pilferer")
 m.newTrigTag('undead')
 m.newDmg(175)
 m.newProc(15)
-# This magic wants to count pieces of Acidic Armor set, including a bunch of
-# things one wouldn't consider as part of a set. Sure as hell not doing that.
+#
 m = Magic("Corrode","corr")
 m.newDmg(75)
+m.newDmg( lambda : 10 * min(OWNED['SET_ACIDIC_ARMOR'],9+7)
 m.newTrig('spellowned',"Corrode")
 m.newDmg(75)
 m.newTrigTag('siege')
@@ -501,6 +528,7 @@ m.newDmg(100)
 m.newTrigTag('guild')
 m.newDmg(190)
 m.newProc(11)
+## SIMPLIFIED SPELL
 #   This checks for a bunch of guild stuff. Let's cheat and say that if you own
 #   the magic, you'll probably have tortured yourself into getting the rest too.
 m = Magic("Deep Freeze","deep")  #avoiding name collision with Dark Forest
@@ -517,10 +545,11 @@ m.newDmg( lambda : OWNED['MAGICS'] )
 m.newTrigTag('human')
 m.newDmg(150)
 m.newProc(10)
-#   This wants number of Curious Cuirassier pieces. I won't do it.
+#
 m = Magic("Desiccate","desi")
 m.newDmg(50)
 m.newDmg( lambda : 5 * OWNED['PLANTESSENCE'] )
+m.newDmg( lambda : 10 * min(OWNED['SET_CURIOUS_CUIRASSIER'],9) )
 m.newTrigTag('plant')
 m.newDmg(175)
 m.newProc(12)
