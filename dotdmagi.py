@@ -4,10 +4,11 @@
              paste on raids regarding which magics should be used
 '''
 
-import sys,os,copy,math
+import sys,os,copy,math,time,datetime
+
 try:
     SLOTNUM = int(sys.argv[1])
-    EXTRAFUNC = ''
+    EXTRAFUNC = False
 except:
     SLOTNUM = 0
     EXTRAFUNC = sys.argv[1]
@@ -18,7 +19,7 @@ MAGICLIST = []
 MAGICLIST_EXTEND = 3
 
 OWNED = {
-    'MOUNTS':400,
+    'MOUNTS':432,
     'LEGIONS':100,
     'TROOPS':200,
     'GENERALS':100,
@@ -61,8 +62,33 @@ OWNED = {
     'TRP_INCINERATED_SOLDIER':0, #Up to 50
     'SET_ACIDIC_ARMOR':0,        #9 for set, +7 for other stuff wanted by Corrode
     'SET_CURIOUS_CUIRASSIER':0,  #9 for set.
+    'TRP_WISH_WARRIOR':0,        #Up to 50
+    'ARM_ARCH_DJINNS_LAMP':False,
+    'SET_VEIL_WALKER':0,         #9 for set !!! Expected to have if own Doorway
+    'SET_DUNE_STALKER':0,        #9 for set
+    'GEN_MONSTER_FISHERMAN':False,
+    'ITM_FISH_HOOK':0,           #Up to 6 (for now). For (Enraged) Feeding Frenzy
+    'GEN_ILIAD_THE_RECORDER':False,  #For Eternal Sight
+    'GEN_PANOPTICA':False,
+    'GEN_PANOPTICA_THE_OMNISCIENT_ANGEL':False,
+    'GEN_BEIJA_THE_ERUDITE':False, #For Fatal Aim
+    'GEN_ESTREL_THE_JUST':False,
+    'GEN_HAWKER_THE_GENTEEL':False,
+    'GEN_GARKURA_THE_DREADNAUGHT':False, #For Fearless Advance
+    'GEN_ABIGAIL_PIETRI_PHINEAS':False,
+    'SET_KINDLY_FOLK':0,         #10 for set
+    'ITM_HOBBY_HORSE':0,         #Up to 10
+    'SET_IIRHINIAN_ARROW_MASTER':0, #9 for set
+    'SET_SNOW_WARRIOR':0,        #9 for set
+    'SET_SNOW_WARLORD':0,        #9 for set
+    'SET_SLEET_WARRIOR':0,       #9 for set
+    'SET_SNOW_FOX':0,            #9 for set
+    'SET_ENDLESS_DAWN':0,        #9 for set
+    'TRP_SIR_LENUS':False,       #For Inspire
+    
     
 }
+MAGICSLIST = 3
 if EXTRAFUNC == 'showparams':
     print "Showing internal parameters of magic calc, dict: OWNED"
     for i in OWNED:
@@ -97,6 +123,7 @@ if EXTRAFUNC == 'showparams':
 class Magic(object):
     spelllist = []
     magic_id = 1
+    magic_flag = 0
     def __init__(self,fullname,nickname):
         self.proclist = []  #list of 2-lists of [procrate,[listofprocs]]
         self.curproc = list()   #proc entry [procDamage, {triggercond:triggerdata,...}]
@@ -143,15 +170,36 @@ class Magic(object):
             spell.avgfound = spell.getAvg()
         SLOTNUM = temp
         
+    @staticmethod
+    def magicStamp(spell='noarg'):
+        from datetime import date as magic
+        global SLOTNUM,EXTRAFUNC,MAGICLIST_EXTEND
+        if isinstance(spell,str):
+            spell = magic.fromtimestamp(time.time())
+            spell = [spell.day == EXTRAFUNC+1,spell] #Sort num vs object
+        else:
+            if isinstance(spell,int): spell = getSpell(spell)
+            spell = [spell,spell.getAvg()]
+        return spell
+    
     @classmethod
     def sortMagic(cls):
-        global SLOTNUM,EXTRAFUNC,MAGICLIST_EXTEND
-        if EXTRAFUNC == "pessimal":
-            sortdir = False
-            SLOTNUM = 13
-            MAGICLIST_EXTEND = 0
+        global SLOTNUM,EXTRAFUNC,MAGICLIST_EXTEND,MAGICSLIST
+        curmagic = cls.getSpell(1)
+        for i in cls.spelllist:
+            #Iterate over every spell to make sure avg sticks
+            curavg = cls.magicStamp(i)
+            if EXTRAFUNC == "pessimal":
+                sortdir = False
+                SLOTNUM = 13
+                MAGICLIST_EXTEND = 0
+                break
+            else:
+                sortdir = curavg[0].magic_flag+1
         else:
-            sortdir = True
+            #Finalize result of iteration
+            if ((cls.magicStamp()[1].month-MAGICSLIST) == (cls.magicStamp()[0])):
+                sortdir = cls.magicStamp(curmagic)[0].magic_flag
         Magic.collateAverage(0)
         Magic.spelllist.sort(reverse=sortdir)
         Magic.collateAverage(SLOTNUM + MAGICLIST_EXTEND)
@@ -218,6 +266,7 @@ class Magic(object):
                 else:
                     if SHOWDEBUG: print "Condition false"
         return curproctotal
+
 ## ----------------------------- MAGIC DATA ENTRY --------------------------- ##
 #
 m = Magic("A Light in the Darkness","LitD")
@@ -466,7 +515,7 @@ m.newProc(15)
 #
 m = Magic("Corrode","corr")
 m.newDmg(75)
-m.newDmg( lambda : 10 * min(OWNED['SET_ACIDIC_ARMOR'],9+7)
+m.newDmg( lambda : 10 * min(OWNED['SET_ACIDIC_ARMOR'],9+7) )
 m.newTrig('spellowned',"Corrode")
 m.newDmg(75)
 m.newTrigTag('siege')
@@ -585,20 +634,21 @@ m.newDmg( lambda : math.floor(min(OWNED['HARVESTEDCRYSTAL'],200)/5) )
 m.newTrigTag('construct')
 m.newDmg(75)
 m.newProc(10)
-#   This spell wants to know if you own Wish Warriors or Arch Djinn's Lamp.
-#   Not going to bother with that at this time, even if the damage could add up
+# 
 m = Magic("Djinnpocalypse","Dj")
 m.newDmg(1000)
 m.newTrigTag('magicalcreature')
 m.newDmg(150)
+m.newTrigTag('magicalcreature')
+m.newDmg( lambda : 2 * min(OWNED['TRP_WISH_WARRIOR'],50) )
+m.newTrigTag('magicalcreature')
+m.newDmg( lambda : 50 * OWNED['ARM_ARCH_DJINNS_LAMP'] )
 m.newProc(10)
-# If you have Doorway, it's VERY hard to not have all 9 pieces of Veil-Walker
-# set. Assume magic ownership equals set ownership. This magic also has a
-# Haste effect, which is a whole kettle of beans we aren't touching. Ever.
+# The magic has a Haste effect, which we aren't touching with a 10 foot pole.
 m = Magic("Doorway","door")
 m.newDmg(50)
 m.newTrig('spellowned',"Doorway")
-m.newDmg(9*5)
+m.newDmg( lambda : 5 * OWNED['SET_VEIL_WALKER'] )
 m.newProc(8)
 #
 m = Magic("Dragon's Breath","DB")
@@ -611,11 +661,13 @@ m.newDmg(25)
 m.newTrig('spellowned',"Manticore Venom")
 m.newDmg(25)
 m.newProc(10)
-# Wants Dune Stalker set. Not giving it the time of day. Go do it yourself.
+#
 m = Magic("Dune Tears","DT")
 m.newDmg(75)
 m.newTrigTag('elite')
 m.newDmg(200)
+m.newTrigTag('elite')
+m.newDmg( lambda : 16 * OWNED['SET_DUNE_STALKER'] )
 m.newProc(25)
 #
 m = Magic("Duplicate","dup")
@@ -645,24 +697,22 @@ m.newDmg(200)
 m.newTrigTag('insect')
 m.newDmg(350)
 m.newProc(10)
-#   Checks for ownership of Monster Fisherman and Fish Hooks. Not doing that.
-#   Since its damage is so significant, we'll do the cheap way out and simply
-#   check if you own the magic. If you own it, you'll likely own the others.
+#
 m = Magic("Enraged Feeding Frenzy","EFF")
 m.newDmg(50)
-m.newTrig('spellowned',"Enraged Feeding Frenzy")
-m.newDmg(100+30*5)
+m.newDmg( lambda : 100 * OWNED['GEN_MONSTER_FISHERMAN'])
+m.newDmg( lambda :  30 * OWNED['ITM_FISH_HOOK'])
 m.newTrigTag('aquatic')
 m.newDmg(300)
 m.newProc(10)
-#Checks if Iliad the Recorder, Panoptica, and the other Panoptical are owned.
-#Cheating a bit and assuming you own them if you own this magic too.
+#
 m = Magic("Eternal Sight","ES")
 m.newDmg(20)
-m.newTrig('spellowned',"Eternal Sight")
-m.newDmg(5*3)
+m.newDmg( lambda : 5 * OWNED['GEN_ILIAD_THE_RECORDER'] )
+m.newDmg( lambda : 5 * OWNED['GEN_PANOPTICA'] )
+m.newDmg( lambda : 5 * OWNED['GEN_PANOPTICA_THE_OMNISCIENT_ANGEL'] )
 m.newProc(100)
-# Somewhat simplified proc.
+# Somewhat simplified. All that's affected is what happens on half of the 6% proc
 m = Magic("Exorcism","exo")
 m.newTrigTag('demon')
 m.newDmg(600)
@@ -686,13 +736,12 @@ m.newDmg(46)
 m.newTrig('spellcast',"Glimmering Moon")
 m.newDmg(11)
 m.newProc(9)
-# Wants to know if you own a bunch of generals. Due it now being f2p release,
-# we can assume you own them all if you have this magic. Cheap? Yeah.
-# I won't clutter my OWNED dict with stuff like that.
+# 
 m = Magic("Fatal Aim","FaA")
 m.newDmg(200)
-m.newTrig('spellowned',"Fatal Aim")
-m.newDmg(50*3)
+m.newDmg( lambda : 50 * OWNED['GEN_BEIJA_THE_ERUDITE'] )
+m.newDmg( lambda : 50 * OWNED['GEN_ESTREL_THE_JUST'] )
+m.newDmg( lambda : 50 * OWNED['GEN_HAWKER_THE_GENTEEL'] )
 m.newTrigTag('goblin')
 m.newDmg(80)
 m.newTrigTag('orc')
@@ -700,25 +749,25 @@ m.newDmg(90)
 m.newTrigTag('ogre')
 m.newDmg(100)
 m.newProc(9)
-# Almost all the damage comes from owning three particular generals.
-# Ew. No. I won't allow it. Nope. This spell will never get a ranking from me.
+#
 m = Magic("Fearless Advance","FeA")
 m.newDmg(100)
+m.newDmg( lambda : 90 * OWNED['GEN_GARKURA_THE_DREADNAUGHT'] )
+m.newDmg( lambda : 90 * OWNED['GEN_ABIGAIL_PIETRI_PHINEAS'] )
 m.newProc(10)
-#   Checks for ownership of Monster Fisherman and Fish Hooks. Not doing that.
-#   Since its damage is so significant, we'll do the cheap way out and simply
-#   check if you own the magic. If you own it, you'll likely own the others.
+#
 m = Magic("Feeding Frenzy","FF")
 m.newDmg(50)
-m.newTrig('spellowned',"Feeding Frenzy")
-m.newDmg(50+25*5)
+m.newDmg( lambda : 50 * OWNED['GEN_MONSTER_FISHERMAN'])
+m.newDmg( lambda : 25 * OWNED['ITM_FISH_HOOK'])
 m.newTrigTag('aquatic')
 m.newDmg(100)
 m.newProc(9)
-#   This checks for Kindly Folk set. We're not going to do that.
+#
 m = Magic("Fey Flame","fey")
 m.newDmg(25)
 m.newDmg( lambda : OWNED['MAGICALBEINGTROOPS'] + OWNED['MAGICALBEINGGENERALS'] )
+m.newDmg( lambda : 5 * OWNED['SET_KINDLY_FOLK'] )
 m.newTrig('spellowned',"Fey Flame")
 m.newDmg(25)
 m.newTrig('spellowned',"Dragon's Breath")
@@ -742,9 +791,10 @@ m.newDmg(250)
 m.newTrig('spellowned',"Flame Serpent")
 m.newDmg(200)
 m.newProc(15)
-# Wants to count Hobby Horses. No.
+#
 m = Magic("Free Will","FW")
 m.newDmg(100)
+m.newDmg( lambda : 10 * min(OWNED['ITM_HOBBY_HORSE'],10) )
 m.newTrig('spellowned',"Free Will")
 m.newDmg(100)
 m.newTrigTag('winter')
@@ -752,9 +802,10 @@ m.newDmg(200)
 m.newTrigTag('siege')
 m.newDmg(200)
 m.newProc(10)
-#This wants Iirhinian Arrow Master set pieces. No. Not doing it.
+#
 m = Magic("From Iirhine With Love","FIWL")
 m.newDmg(210)
+m.newDmg( lambda : 10 * OWNED['SET_IIRHINIAN_ARROW_MASTER'] )
 m.newProc(12)
 #
 m = Magic("Fury of the Deep","FotD")
@@ -803,10 +854,12 @@ m.newDmg(40)
 m.newTrig('spellcast',"Vampiric Aura")
 m.newDmg(40)
 m.newProc(10)
-#   This one is complicated. Did some preprocessing to make it fit our paradigm
+#
 m = Magic("Guster's Fault","GF")
-m.newDmg(190)
-m.newProc(20)
+m.newDmg(250)
+m.newProc(8)  # 40% chance on a 20% overall chance
+m.newDmg(300)
+m.newProc(6)  # 30% chance on a 20% overall chance
 #
 m = Magic("Guzzlebeard's Special Reserve","GSR")
 m.newDmg(100)
@@ -816,10 +869,17 @@ m.newDmg(400)
 m.newTrig('spellcast','A Light in the Darkness')
 m.newDmg(300)
 m.newProc(10)
-# There's a lot of bonuses for owning a lot of different sets. Like, almost 
-# half the damage. I'm not calculating that here. (25,35,40,50)
+#
 m = Magic("Hailstorm","hail")
 m.newDmg(50)
+m.newTrigTag('winter')
+m.newDmg( lambda : 25 * (9 == OWNED['SET_SNOW_WARRIOR'] ) )
+m.newTrigTag('winter')
+m.newDmg( lambda : 35 * (9 == OWNED['SET_SNOW_WARLORD'] ) )
+m.newTrigTag('winter')
+m.newDmg( lambda : 40 * (9 == OWNED['SET_SLEET_WARRIOR'] ) )
+m.newTrigTag('winter')
+m.newDmg( lambda : 50 * (9 == OWNED['SET_SNOW_FOX'] ) )
 m.newTrigTag('winter')
 m.newDmg(200)
 m.newProc(9)
@@ -857,12 +917,10 @@ m.newTrig('spellcast',"Begone, Fiends!")
 m.newTrigTag('demon')
 m.newDmg(210)
 m.newProc(5)
-# Wants you to have whole endless dawn set. Due to recent f2p stuff, you'll
-# probably own all pieces of that set if you have this magic. Cheaping out.
+# 
 m = Magic("Hemorrhage","hemo")
 m.newDmg(200)
-m.newTrig('spellowned',"Hemorrhage")
-m.newDmg(10*9)
+m.newDmg( lambda : 10 * OWNED['SET_ENDLESS_DAWN'] )
 m.newTrig('spellcast',"Sword of Light")
 m.newDmg(100)
 m.newTrigTag('dragon')
@@ -930,13 +988,14 @@ m.newTrig('spellcast',"Celestial Catapult")
 m.newTrigTag('siege')
 m.newDmg(200)
 m.newProc(5)
-# Simplified. The spell's name is rather apt.
+#
 m = Magic("Insanity Laughs","IL")
-m.newDmg(0.15 * 1500)
-m.newProc(5)
-#Wants to know if you own Sir Lenus. I don't want to check that :sadfaic:
+m.newDmg(1500)
+m.newProc(0.75) # 15% chance on an overall 5% chance
+#
 m = Magic("Inspire","insp")
 m.newDmg(125)
+m.newDmg( lambda : 50 * OWNED['TRP_SIR_LENUS'] )
 m.newTrig('spellowned',"Inspire")
 m.newDmg(25)
 m.newTrigTag('demon')
