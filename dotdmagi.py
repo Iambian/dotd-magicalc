@@ -2,6 +2,10 @@
     usage: dotdmagi.py numsspellslots tag1 [tag2 [tag3...]]
     returns: Details of best magics from best to worst and a short string to
              paste on raids regarding which magics should be used
+             
+    NOTE: Tags may not contain any spaces. e.g. "Black Hand" becomes "blackhand"
+    NOTE: IF YOU ARE NEW TO PYTHON, ALL LABELS, NAMES, AND TEXT IS
+          CASE-SENSITIVE. RESPECT IT, OR YOU WILL HAVE A bad time.
 '''
 
 import sys,os,copy,math,time,datetime
@@ -14,7 +18,7 @@ except:
     EXTRAFUNC = sys.argv[1]
 SHOWDEBUG = False
 USERAREMAGIC = False
-RAIDTAGS = sys.argv[2:]
+RAIDTAGS = [s.lower() for s in sys.argv[2:]]
 MAGICLIST = []
 MAGICLIST_EXTEND = 3
 
@@ -60,7 +64,19 @@ OWNED = {
     'SET_BATTLE_SCARRED':0,      #9 for set, +3 for other stuff that the spells want
     'ARM_LIVING_FLAME':False,
     'TRP_INCINERATED_SOLDIER':0, #Up to 50
+    'GEN_BURUT_THE_HUNGRY':False,  #For Consume. Part of many things.
+    'ITM_TURKEY_OF_PLENTY':0,    #Up to 5
+    'ITM_DEER_OF_PLENTY':0,      #Up to 5
+    'ITM_BEAR_OF_PLENTY':0,      #Up to 5
+    'ITM_BOAR_OF_PLENTY':0,      #Up to 5
     'SET_ACIDIC_ARMOR':0,        #9 for set, +7 for other stuff wanted by Corrode
+    'GEN_HAIMISH':False,         #The following gens and 3 items for Deep Freeze
+    'GEN_OLD_DEAD_ELVIGAR':False,
+    'GEN_UTHIN':False,
+    'GEN_VILI':False,
+    'ITM_CRYSTAL_OF_THE_DEADLY_COLD':False,
+    'ITM_KINGSJAW':False,
+    'ITM_DARKES_SIGHT':False,
     'SET_CURIOUS_CUIRASSIER':0,  #9 for set.
     'TRP_WISH_WARRIOR':0,        #Up to 50
     'ARM_ARCH_DJINNS_LAMP':False,
@@ -85,7 +101,39 @@ OWNED = {
     'SET_SNOW_FOX':0,            #9 for set
     'SET_ENDLESS_DAWN':0,        #9 for set
     'TRP_SIR_LENUS':False,       #For Inspire
-    
+    'SET_JOVIAL_JESTER':0,       #9 for set
+    'SET_CELEBRATION':0,         #9 for set
+    'SET_FOREST_SENTINEL':0,     #9 for set
+    'ARM_SABIRAHS_ASHES':False,  #For Judgement
+    'ARM_CERMARINAS_BLADE':False,
+    'ITM_STORMSHIP':0,           #up to 50
+    'TRP_CLOUD_ELEMENTAL':0,     #up to 25
+    'GEN_PASITHEA':False,
+    'GEN_BELLEFOREST':False,
+    'GEN_ESCH':False,
+    'TRP_SLEEPLESS_SOLDIERS':50,  #Up to 50. You probably own them all already.
+    'TRP_GRIFFIN_CHAMPIONS':0,    #Up to 100
+    'SET_INFINITE_DAWN':0,        #10 for set
+    'GEN_SIR_JORIM':False,        #For Mystic Slaughterers
+    'SET_SPIRIT_RAVEN':0,         #9 for set. For Rally
+    'SET_RESURRECTION':0,         #9 for set +3 more as Resurrect wants
+    'GEN_SAR_VELANIA_THE_RED':False, #For Seven Unyielding. Yeah. THAT magic.
+    'GEN_SIR_BOHEMOND_THE_ORANGE':False,
+    'GEN_SIR_EMERIC_THE_YELLOW':False,
+    'GEN_SIR_AARON_THE_BLUE':False,
+    'GEN_SIR_COLBAEUS_THE_GREEN':False,
+    'GEN_SAR_MEURA_THE_INDIGO':False,
+    'GEN_SAR_WENNI_THE_VIOLET':False,
+    'SET_SHADOW-SLIP_ASSASSIN':0, #9 for set
+    'GEN_YING_OF_THE_SHATTERED_MOON':False, #For Shattered Moon
+    'SET_WEE_WARRIOR':0,          #9 for set
+    'SET_BRUTE_STRENGTH':0,       #9 for set
+    'TRP_GRAVE_GUARDIAN':0,       #Up to 50
+    'SET_WARRIOR_POET':0,         #9 for set
+    'SET_RISING_DAWN':0,          #10 for set
+    'SET_VIOLET_KNIGHT':0,        #9 for set
+    'SET_DEPTH_TERROR':0,         #10 for set
+    'ITM_LEGEND_OF_THE_DEMIGOD':False, #For lv10k magic
     
 }
 MAGICSLIST = 3
@@ -356,7 +404,7 @@ m.newDmg(lambda : 4 * OWNED['BEASTMANESSENCE'])
 m.newTrigTag('beastman')
 m.newDmg(35)
 m.newProc(80)
-# This only heals the user and maybe improve crit chance if Glimmering Moon is cast
+## This only heals the user and improve crit chance if Glimmering Moon is cast
 m = Magic("Blazing Sun","BS")
 m.newDmg(0)
 m.newTrig('spellcast',"Glimmering Moon")
@@ -479,21 +527,21 @@ m = Magic("Conflagration","conf")
 m.newTrigTag('winter')
 m.newDmg(100)
 m.newTrigTag('winter')
-m.newDmg(lambda : 3 * min(OWNED['ARM_LIVING_FLAME'],50))
+m.newDmg(lambda : 3 * min(OWNED['TRP_INCINERATED_SOLDIER'],50))
 m.newTrigTag('winter')
 m.newDmg(lambda : 100 * OWNED['ARM_LIVING_FLAME'])
 m.newTrigTag('winter')
 m.newTrig('spellcast','Flame Serpent')
 m.newDmg(150)
 m.newProc(25)
-## SIMPLIFIED SPELL
-#   Most of the damage comes from checking if Burut the Hungry is owned, and if
-#   the other mounts from Horn of Plenty is owned. This is such a thing, so
-#   let's just assume you own it all if you have the magic. It'll be cheaper.
+#
 m = Magic("Consume","cons")
 m.newDmg(120)
-m.newTrig('spellowned',"Consume") #workaround
-m.newDmg(40+5*(5*3))
+m.newDmg( lambda : 40 * OWNED['GEN_BURUT_THE_HUNGRY'] )
+m.newDmg( lambda :  5 * min(OWNED['ITM_TURKEY_OF_PLENTY'],5) )
+m.newDmg( lambda :  5 * min(OWNED['ITM_DEER_OF_PLENTY'],5) )
+m.newDmg( lambda :  5 * min(OWNED['ITM_BEAR_OF_PLENTY'],5) )
+m.newDmg( lambda :  5 * min(OWNED['ITM_BOAR_OF_PLENTY'],5) )
 m.newProc(15)
 #
 m = Magic("Contagion","cont")
@@ -577,13 +625,16 @@ m.newDmg(100)
 m.newTrigTag('guild')
 m.newDmg(190)
 m.newProc(11)
-## SIMPLIFIED SPELL
-#   This checks for a bunch of guild stuff. Let's cheat and say that if you own
-#   the magic, you'll probably have tortured yourself into getting the rest too.
+#
 m = Magic("Deep Freeze","deep")  #avoiding name collision with Dark Forest
 m.newDmg(50)
-m.newTrig('spellowned',"Deep Freeze")
-m.newDmg(10*4+15*3)
+m.newDmg( lambda : 10 * OWNED['GEN_HAIMISH'] ) 
+m.newDmg( lambda : 10 * OWNED['GEN_OLD_DEAD_ELVIGAR'] ) 
+m.newDmg( lambda : 10 * OWNED['GEN_UTHIN'] ) 
+m.newDmg( lambda : 10 * OWNED['GEN_VILI'] ) 
+m.newDmg( lambda : 15 * OWNED['ITM_CRYSTAL_OF_THE_DEADLY_COLD'] ) 
+m.newDmg( lambda : 15 * OWNED['ITM_KINGSJAW'] ) 
+m.newDmg( lambda : 15 * OWNED['ITM_DARKES_SIGHT'] ) 
 m.newTrigTag('aquatic')
 m.newDmg(100)
 m.newProc(13)
@@ -1008,20 +1059,26 @@ m.newDmg(lambda : 12 * OWNED['FESTIVALESSENCE'])
 m.newTrigTag('festival')
 m.newDmg(100)
 m.newProc(35)
-# Wants count of Jovial Jester and Celebration sets. No way jose. (9*2*5)
+#
 m = Magic("Intoxicate","intox")
 m.newDmg(75)
+m.newDmg( lambda : 5 * OWNED['SET_JOVIAL_JESTER'] )
+m.newDmg( lambda : 5 * OWNED['SET_CELEBRATION'] )
 m.newTrigTag('festival')
 m.newDmg(100)
 m.newProc(15)
-# Wants forest sentinel set count. I am not going to do that.
+#
 m = Magic("Invasive Growth","IG")
 m.newTrigTag('beast')
 m.newDmg(100)
+m.newTrigTag('beast')
+m.newDmg( lambda : 10 * OWNED['SET_FOREST_SENTINEL'] )
 m.newProc(10)
-# Checks for Sabirah's Ashes and Cermarina's Blade. I won't do it. (100*2)
+#
 m = Magic("Judgement","judge")
 m.newDmg(200)
+m.newDmg( lambda : 100 * OWNED['ARM_SABIRAHS_ASHES'] )
+m.newDmg( lambda : 100 * OWNED['ARM_CERMARINAS_BLADE'] )
 m.newTrigTag('demon')
 m.newDmg(75)
 m.newTrigTag('human')
@@ -1047,15 +1104,20 @@ m.newProc(1)
 m = Magic("Lesser Poison","LP")
 m.newDmg(2)
 m.newProc(4)
-# Checks for stormships and cloud elementals owned. No. (50+25)
+#
 m = Magic("Levitate","lev")
 m.newDmg(100)
+m.newDmg( lambda : min(OWNED['ITM_STORMSHIP'],50) )
+m.newDmg( lambda : min(OWNED['TRP_CLOUD_ELEMENTAL'],25) )
 m.newTrigTag('qwiladrian')
 m.newDmg(200)
 m.newProc(10)
-# Checks for three particular generals. I'm not going to do that. (25*3)
+#
 m = Magic("Lightning Rod","LR")
 m.newDmg(100)
+m.newDmg( lambda : 25 * OWNED['GEN_PASITHEA'] )
+m.newDmg( lambda : 25 * OWNED['GEN_BELLEFOREST'] )
+m.newDmg( lambda : 25 * OWNED['GEN_ESCH'] )
 m.newTrigTag('qwiladrian')
 m.newDmg(200)
 m.newProc(10)
@@ -1083,10 +1145,10 @@ m = Magic("Magic Torch","torch") ## haha
 m.newDmg(float('nan'))
 m.newProc(float('nan'))
 '''
-#Assumes you own 50 sleepless soldiers
+#
 m = Magic("Manifest Dread","MD")
 m.newDmg(50)
-m.newDmg(3*50)
+m.newDmg( lambda : 3 * min(OWNED['TRP_SLEEPLESS_SOLDIERS'],50) )
 m.newTrigTag('magicalcreature')
 m.newDmg(150)
 m.newTrigTag('nightmarequeen')
@@ -1112,9 +1174,10 @@ m.newDmg(25)
 m.newTrigTag('beast')
 m.newDmg(250)
 m.newProc(5)
-#Counts number of griffin champions owned. not doing that. (2*100)
+#
 m = Magic("Mark of the Griffin","MG")
 m.newDmg(25)
+m.newDmg( lambda : 2 * min(OWNED['TRP_GRIFFIN_CHAMPIONS'],100) )
 m.newTrig('spellowned',"Mark of the Griffin")
 m.newDmg(25)
 m.newTrigTag('blackhand')
@@ -1122,20 +1185,19 @@ m.newDmg(300)
 m.newTrigTag('war')
 m.newDmg(300)
 m.newProc(10)
-#   This magic define does not account for infinite dawn set ownership.
-#   Any increase in this case will be negligible.
+#
 m = Magic("Mark of the Infinite Dawn","MID")
 m.newDmg(1980)
 m.newTrigTag('dragon')
-m.newDmg(590)
+m.newDmg(lambda : 590 + 9 * OWNED['SET_INFINITE_DAWN'])
 m.newTrigTag('worldraid')
-m.newDmg(590)
+m.newDmg(lambda : 590 + 9 * OWNED['SET_INFINITE_DAWN'])
 m.newTrigTag('eventraid')
-m.newDmg(590)
+m.newDmg(lambda : 590 + 9 * OWNED['SET_INFINITE_DAWN'])
 m.newTrigTag('elite')
-m.newDmg(590)
+m.newDmg(lambda : 590 + 9 * OWNED['SET_INFINITE_DAWN'])
 m.newTrigTag('deadly')
-m.newDmg(590)
+m.newDmg(lambda : 590 + 9 * OWNED['SET_INFINITE_DAWN'])
 m.newProc(5)
 #
 m = Magic("Mark of the Raven's Wing","MRW")
@@ -1177,9 +1239,10 @@ m.newProc(100)
 m = Magic("Morituri Te Salutant","MTS")
 m.newDmg(10)
 m.newProc(17)
-#It wants to know if you own Sir Jorim. I don't. (10)
+#
 m = Magic("Mystic Slaughterers","MS")
 m.newDmg(10)
+m.newDmg( lambda : 10 * OWNED['GEN_SIR_JORIM'] )
 m.newTrig('spellcast',"Veil Dust")
 m.newDmg(10)
 m.newTrigTag('magicalcreature')
@@ -1216,7 +1279,7 @@ m.newTrigTag(['human','beastman']) #OR CONDITION
 m.newDmg(140)
 m.newProc(20)
 #
-m = Magic("Obedience","obe")
+m = Magic("Obedience","OB")
 m.newDmg(100)
 m.newDmg( lambda : 2 * math.floor(OWNED['GENERALS'] / 100) )
 m.newTrig('spellowned',"Clarion Call")
@@ -1269,9 +1332,7 @@ m.newDmg(150)
 m.newTrigTag('goblin')
 m.newDmg(150)
 m.newProc(10)
-# There might be a problem with the procs on this one due to the wording
-# indicating that a spell needs to be cast or owned for a single 25% dmg proc
-# to trigger. I have no idea how to deal with this right now.
+#
 m = Magic("Purify","puri")
 m.newDmg(100)
 m.newTrigTag('demon')
@@ -1288,6 +1349,15 @@ m.newTrig('spellowned',"Shadowstep")
 m.newDmg(25)
 m.newTrig('spellowned',"Inspire")
 m.newDmg(25)
+m.newTrig('spellcast',"Mark of the Raven's Wing")
+m.newTrig('spellowned',"Mark of the Raven's Wing")
+m.newDmg(-25)
+m.newTrig('spellcast',"Shadowstep")
+m.newTrig('spellowned',"Shadowstep")
+m.newDmg(-25)
+m.newTrig('spellcast',"Inspire")
+m.newTrig('spellowned',"Inspire")
+m.newDmg(-25)
 m.newProc(5)
 #
 m = Magic("Putrid Swamp","PS")
@@ -1306,9 +1376,10 @@ m.newProc(10)
 m = Magic("Quicken Mind","QM")
 m.newDmg(0)
 m.newProc(100)
-# Wants pieces of Battle-Scarred set (+3). Not going to do that. (10*12)
+#
 m = Magic("Quicksand Pit","QSP")
 m.newDmg(60)
+m.newDmg( lambda : 10 * OWNED['SET_BATTLE_SCARRED'] )
 m.newTrigTag('ogre')
 m.newDmg(200)
 m.newTrigTag('nightmarequeen')
@@ -1341,13 +1412,15 @@ m.newDmg(100)
 m.newTrigTag('dragon')
 m.newDmg(100)
 m.newProc(10)
-#   This wants you to calc for # of Spirit Raven set pieces owned. Not doing it.
+#
 m = Magic("Rally","rally")
 m.newTrigTag('guild')
 m.newDmg(120)
 m.newTrigTag('guild')
 m.newTrig('spellcast',["Unity","Deathmark","Volatile Runes"])
 m.newDmg(200)
+m.newTrigTag('guild')
+m.newDmg( lambda : 35 * OWNED['SET_SPIRIT_RAVEN'] )
 m.newProc(6)
 #
 m = Magic("Reflection","ref")
@@ -1360,28 +1433,30 @@ m.newDmg(125)
 m.newTrigTag('undead')
 m.newDmg(125)
 m.newProc(14)
-# Wants Resurrection set pieces (+3). Not doing it. (10*12)
+#
 m = Magic("Resurrect","res")
 m.newDmg(75)
+m.newDmg( lambda : OWNED['SET_RESURRECTION'] )
 m.newTrig('spellowned',"Resurrect")
 m.newDmg(75)
 m.newTrigTag('undead')
 m.newDmg(250)
 m.newProc(10)
-#Proc chance increases by 10 if Blazing Sun is cast. We don't have a way to
-#actually do that, so we just blend it in as a part of proc damage. Maths.
+## Somewhat simplified. Additional 10% chance is represented as its own proc
 m = Magic("Sandstorm","sand")
 m.newDmg(15)
-m.newTrig('spellcast',"Blazing Sun")
-m.newDmg(20)
 m.newProc(26)
-# Wants to count Battle-Scarred set (+3). Not doing it. (10*12)
+m.newTrig('spellcast',"Blazing Sun")
+m.newDmg(15)
+m.newProc(10)
+#
 m = Magic("Sap Energies","sap")
 m.newDmg(60)
+m.newDmg( lambda : 10 * OWNED['SET_BATTLE_SCARRED'] )
 m.newTrigTag('nightmarequeen')
 m.newDmg(200)
 m.newProc(10)
-## SM changed to SaM to avoid collision with Shattered Moon
+## Abbreviation 'SM' changed to 'SaM' to avoid collision with Shattered Moon
 m = Magic("Savage Melodies","SaM")  
 m.newTrigTag('giant')
 m.newDmg(500)
@@ -1398,39 +1473,47 @@ m.newDmg(80)
 m.newTrigTag('ogre')
 m.newDmg(80)
 m.newProc(9)
-#Due to those chests from Dark Cathedral campaign, just assume that if you own
-#this magic, you have all seven of those colorful generals. Cheap, but okay.
+#
 m = Magic("Seven Unyielding","7U")
 m.newDmg(95)
-m.newTrig('spellowned',"Seven Unyielding")
-m.newDmg(7*15)
+m.newDmg( lambda : 15 * OWNED['GEN_SAR_VELANIA_THE_RED'] )
+m.newDmg( lambda : 15 * OWNED['GEN_SIR_BOHEMOND_THE_ORANGE'] )
+m.newDmg( lambda : 15 * OWNED['GEN_SIR_EMERIC_THE_YELLOW'] )
+m.newDmg( lambda : 15 * OWNED['GEN_SIR_AARON_THE_BLUE'] )
+m.newDmg( lambda : 15 * OWNED['GEN_SIR_COLBAEUS_THE_GREEN'] )
+m.newDmg( lambda : 15 * OWNED['GEN_SAR_MEURA_THE_INDIGO'] )
+m.newDmg( lambda : 15 * OWNED['GEN_SAR_WENNI_THE_VIOLET'] )
 m.newProc(8)
 #Shadow Strike was omitted due to same reasons as Battousai
-#Shadowstep wants Shadow-Slip Assassin set. I don't. (15*9)
+#
 m = Magic("Shadowstep","SS")
 m.newDmg(50)
+m.newDmg( lambda : 15 * OWNED['SET_SHADOW-SLIP_ASSASSIN'] )
 m.newTrigTag('demon')
 m.newDmg(120)
 m.newProc(10)
-#   This checks if Ying of the Shattered Moon is owned. We're not doing that.
+#
 m = Magic("Shattered Moon","SM")
 m.newDmg(200)
+m.newDmg( lambda : 100 * OWNED['GEN_YING_OF_THE_SHATTERED_MOON'] )
 m.newTrig('spellowned','Shattered Moon')
 m.newDmg(100)
 m.newTrigTag('human')
 m.newDmg(750)
 m.newProc(10)
-# This wants pieces of Wee Warrior set. I say... no. (10*9)
+#
 m = Magic("Shrink","shrink")
 m.newDmg(100)
+m.newDmg( lambda : 10 * OWNED['SET_WEE_WARRIOR'] )
 m.newTrig('spellowned',"Shrink")
 m.newDmg(100)
 m.newTrigTag('giant')
 m.newDmg(350)
 m.newProc(10)
-# Wants pieces of Brute Strength set. Not doing it. (5*9)
+# 
 m = Magic("Siphon Strength","siphon")
 m.newDmg(100)
+m.newDmg( lambda : 5 * OWNED['SET_BRUTE_STRENGTH'] )
 m.newTrig('spellowned',"Siphon Strength")
 m.newDmg(45)
 m.newTrigTag('goblin')
@@ -1440,53 +1523,59 @@ m.newDmg(200)
 m.newTrigTag('ogre')
 m.newDmg(200)
 m.newProc(10)
-#   This magic also checks for those gauntlet trophies. Not doing that here.
+#
 m = Magic("SMITE","SMITE")
 m.setrare()
 m.newDmg(500)
+m.newDmg(lambda : 100 * OWNED['AUREATE_TROPHY'])
+m.newDmg(lambda :  40 * OWNED['ARGENT_TROPHY'])
+m.newDmg(lambda :  10 * OWNED['BRONZED_TROPHY'])
 m.newTrig('spellowned',"SMITE")
 m.newDmg(150)
 m.newProc(22)
-#   Checks for number of Grave Guardians owned. We don't do this.
+#
 m = Magic("Soul Pilferer","SP")
 m.newTrigTag('undead')
 m.newDmg(300)
 m.newTrigTag('undead')
+m.newDmg( lambda : 5 * min(OWNED['TRP_GRAVE_GUARDIAN'],50))
+m.newTrigTag('undead')
 m.newTrig('spellcast',"Gravebane")
 m.newDmg(400)
 m.newProc(15)
-# It wants pieces of the Warrior Poet set. No. (9*5)
+# 
 m = Magic("Stanzas of Slaughter","SoS")
 m.newDmg(120)
+m.newDmg( lambda : 5 * OWNED['SET_WARRIOR_POET'] )
 m.newTrig('spellcast',"Harmony")
 m.newDmg(50)
 m.newTrig('spellcast',"Discord")
 m.newDmg(50)
 m.newProc(9)
-# Wants pieces of the Battle-Scarred set (+3). No. (10*12)
+#
 m = Magic("Survivor","surv")
 m.newDmg(60)
+m.newDmg( lambda : 10 * OWNED['SET_BATTLE_SCARRED'] )
 m.newTrigTag('orc')
 m.newDmg(200)
 m.newTrigTag('nightmarequeen')
 m.newDmg(200)
 m.newProc(10)
-# Let's assume, due to the proliferation of those Chest of Ages things that
-# if you own the magic, you have all the pieces of the Rising Dawn set.
+#
 m = Magic("Sword of Light","SoL")
 m.newDmg(100)
-m.newTrig('spellowned',"Sword of Light")
-m.newDmg(15*9)
+m.newDmg( lambda : 15 * OWNED['SET_RISING_DAWN'])
 m.newTrigTag('dragon')
 m.newDmg(150)
 m.newProc(10)
-# Proc chance increases by 3% on match. Goodness gracious. More math 
+## Somewhat simplified proc. Additional proc chance is represented as its own
 m = Magic("Terracles' Blessing","TB")
 m.newDmg(48)
+m.newProc(12)
 m.newTrig('spellcast',"Lyria's Swiftness")
 m.newTrigTag('dragon')
-m.newDmg(12)  #simulation of +3% proc rate
-m.newProc(12)
+m.newDmg(48)
+m.newProc(3)
 #
 m = Magic("Titan Killer","TK")
 m.newDmg(200)
@@ -1541,18 +1630,16 @@ m.newDmg(50)
 m.newTrigTag('magicalcreature')
 m.newDmg(400)
 m.newProc(10)
-# Assumes you own all six (?) pieces of Violet Knight set if you have the magic
-# due to DC campaign loot
+#
 m = Magic("Violet Storm","VS")
 m.newDmg(90)
-m.newTrig('spellowned',"Violet Storm")
-m.newDmg(5*6)
+m.newDmg( lambda : 5 * OWNED['SET_VIOLET_KNIGHT'] )
 m.newProc(5)
-#   This counts Depth Terror set. We're not doing that.
+#
 m = Magic("Visions of the Deep","VotD")
 m.newDmg(500)
 m.newTrigTag(['terror','abyssal']) #OR condition. Apply proc once.
-m.newDmg(58)
+m.newDmg(lambda : 58 + 4 * OWNED['SET_DEPTH_TERROR'])
 m.newTrigTag('terror')
 m.newTrig('spellcast',"Typhoon")
 m.newDmg(28)
@@ -1637,6 +1724,8 @@ m.newProc(1)
 m = Magic("[LV 10,000]","#3#")
 m.newDmg(30)
 m.newProc(100)
+m.newDmg( lambda : 200 * OWNED['ITM_LEGEND_OF_THE_DEMIGOD'] )
+m.newProc(20)
 #
 m = Magic("[LV 20,000]","#4#")
 m.newDmg(50)
