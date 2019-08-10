@@ -8,6 +8,8 @@
           CASE-SENSITIVE. RESPECT IT, OR YOU WILL HAVE A bad time.
 '''
 
+''' Programmer's note: This was supposed to be simple. How did it get this messy? '''
+
 import sys,os,copy,math,time,datetime
 
 try:
@@ -173,19 +175,31 @@ class Magic(object):
     magic_id = 1
     magic_flag = 0
     def __init__(self,fullname,nickname):
-        self.proclist = []  #list of 2-lists of [procrate,[listofprocs]]
-        self.curproc = list()   #proc entry [procDamage, {triggercond:triggerdata,...}]
-        self.temptrigger = dict()
+        self.reset()
         self.fullname = fullname
         self.nickname = nickname
-        self.israre = False
-        self.avgfound = 0
-        
+        self.numspells = 1
+        self.contains = [self]
+        self.month = 12
         self.id = Magic.magic_id
         Magic.magic_id += 1
         Magic.spelllist.append(self)
+        
+    def reset(self):
+        self.proclist = []  #list of 2-lists of [procrate,[listofprocs]]
+        self.curproc = list()   #proc entry [procDamage, {triggercond:triggerdata,...}]
+        self.temptrigger = dict()
+        self.israre = False
+        self.avgfound = 0
+        
     def __lt__(self,other):
-        return self.avgfound < other.avgfound
+        return self.avgfound < other.avgfound 
+    def __eq__(self,other):
+        if isinstance(other,Magic): other = other.id
+        if isinstance(self,Magic):  self =  self.id
+        return self == other
+    def __hash__(self):
+        return self.id
         
     def newTrig(self,triggertype,triggerdata):
         if not isinstance(triggerdata,(list,tuple)):
@@ -202,13 +216,14 @@ class Magic(object):
     def setRare(self):
         self.israre = True
     def setrare(self): self.setRare() #convenience
+    
         
-    @classmethod
-    def getSpell(cls,spellid):
-        for i in cls.spelllist:
+    @staticmethod
+    def getSpell(spellid):
+        for i in Magic.spelllist:
             if i.id == spellid:
                 return i
-        return cls.spelllist[0]
+        return Magic.spelllist[0]
     @staticmethod
     def collateAverage(listlen):
         global SLOTNUM
@@ -222,12 +237,13 @@ class Magic(object):
     def magicStamp(spell='noarg'):
         from datetime import date as magic
         global SLOTNUM,EXTRAFUNC,MAGICLIST_EXTEND
-        if isinstance(spell,str):
+        if isinstance(spell,str) and not isinstance(EXTRAFUNC,str):
             spell = magic.fromtimestamp(time.time())
             spell = [spell.day == EXTRAFUNC+1,spell] #Sort num vs object
         else:
-            if isinstance(spell,int): spell = getSpell(spell)
-            spell = [spell,spell.getAvg()]
+            if isinstance(spell,str): spell = Magic.getID(spell)
+            if isinstance(spell,int): spell = Magic.getSpell(spell)
+            spell = [spell,spell.contains[0]]
         return spell
     
     @classmethod
@@ -261,7 +277,16 @@ class Magic(object):
         return 0
         
     def getAvg(self):
+        global EXTRAFUNC
+        averages = []
+        for spell in self.contains:
+            averages.append(self.getAvgSub(spell))
+        return sum(averages)/len(averages)
+        
+    @staticmethod
+    def getAvgSub(spell):
         global RAIDTAGS,OWNED,USERAREMAGIC,SHOWDEBUG,SLOTNUM,EXTRAFUNC
+        self = spell     #make it so each spell instance is usable
         curproctotal = 0
         if self.israre and not USERAREMAGIC:
             return float('inf') if EXTRAFUNC == 'pessimal' else 0
@@ -314,6 +339,69 @@ class Magic(object):
                 else:
                     if SHOWDEBUG: print "Condition false"
         return curproctotal
+    
+#Overrides cls.spelllist with self.spelllist containing the magics that are
+#only used during the compare for averaging purposes    
+class MetaMagic(Magic):
+    def __init__(self,*args):  #contains spell IDs, names, or Magic instances
+        self.reset()
+        mainspelllist = self.spelllist  #should reference main list
+        newspelllist = []
+        for arg in args:
+            if isinstance(arg,int):
+                newspelllist.append(self.getSpell(arg))
+            elif isinstance(arg,str):
+                newspelllist.append(self.getSpell(self.getID(arg)))
+            else:
+                newspelllist.append(arg)
+        self.fullname = str([s.fullname for s in newspelllist])
+        self.nickname = str([s.nickname for s in newspelllist])
+        self.numspells = len(newspelllist)
+        self.contains = newspelllist
+        self.id = Magic.magic_id
+        Magic.magic_id += 1
+        Magic.spelllist.append(self)
+        self.spelllist = newspelllist  #the hack
+        
+    #   This method fills Magic.spelllist with all metamagic
+    #   pairs that have a castable synergy to them.
+    @classmethod
+    def fillMetaPairs(cls):
+        # Iterate through all spells
+        for idx,spell in enumerate(Magic.spelllist):
+            if len(spell.contains) > 1: continue #Do not process metaspells
+            # Iterate over remaining spells to find a proc that uses spell
+            for spellcmp in Magic.spelllist[idx:]:
+                if spell in list(set(list(cls.getSpellcastProcs(spellcmp.id)))):
+                    pair = [spell,spellcmp]
+                    #Check our pair against magic list to see if it already exists
+                    for spellchk in Magic.spelllist:
+                        if set(spellchk.contains) == set(pair):
+                            break
+                    else:
+                        #This runs if the loop passes through without collision
+                        MetaMagic(pair[0].id,pair[1].id)
+            
+        
+    #Generator that returns Magic objects that contain spells listed in
+    #any of the input spell's 'spellcast' proc trigger(s)
+    @classmethod
+    def getSpellcastProcs(cls,spellID):
+        spell = cls.getSpell(spellID)
+        for procs in spell.proclist:
+            for proc in procs[1]:
+                triggers = proc[1]
+                if 'spellcast' in triggers:
+                    data = triggers['spellcast']
+                    for i in range(len(data)):
+                        if isinstance(data[i],str):
+                            data[i] = cls.getID(data[i])
+                        yield cls.getSpell(data[i])
+    #
+    
+            
+        
+    
 
 ## ----------------------------- MAGIC DATA ENTRY --------------------------- ##
 #
@@ -1815,8 +1903,25 @@ if EXTRAFUNC=='selftest':
     else:
         print "FAIL: Some self-test functions have produced an error."
     sys.exit()
-
-
+    
+if EXTRAFUNC in ['dumpnames','dumplist']:
+    MetaMagic.fillMetaPairs()
+    for spell in Magic.spelllist:
+        print str(spell.fullname) + " / " + str(spell.nickname)
+    sys.exit()
+if EXTRAFUNC == 'dumpavg':
+    MetaMagic.fillMetaPairs()
+    for spell in Magic.spelllist:
+        print str(spell.nickname) + ": " + str(spell.getAvg())
+    sys.exit()
+if EXTRAFUNC == 'count':
+    spellcount = len(Magic.spelllist)
+    print "Number of spells in database: "+str(spellcount)
+    MetaMagic.fillMetaPairs()
+    print "Number of metamagic in database: "+str(len(Magic.spelllist)-spellcount)
+    sys.exit()
+    
+    
 
 '''
 m = Magic("","")
@@ -1832,6 +1937,8 @@ HORIZONTAL_DIVIDER = "------------" *3
 print MAIN_DIVIDER
 print "Raid magic, calc for tags: "+str(RAIDTAGS)
 print MAIN_DIVIDER
+
+#MetaMagic.fillMetaPairs()
 Magic.sortMagic()
 shortlist = ""
 for idx,spell in enumerate(Magic.spelllist[:SLOTNUM+MAGICLIST_EXTEND]):
