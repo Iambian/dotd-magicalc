@@ -19,6 +19,7 @@ except:
     SLOTNUM = 0
     EXTRAFUNC = sys.argv[1]
 SHOWDEBUG = False
+SPELLSPLITDEBUG = True
 USERAREMAGIC = False
 RAIDTAGS = [s.lower() for s in sys.argv[2:]]
 MAGICLIST = []
@@ -101,7 +102,7 @@ OWNED = {
     'SET_SNOW_WARLORD':0,        #9 for set
     'SET_SLEET_WARRIOR':0,       #9 for set
     'SET_SNOW_FOX':0,            #9 for set
-    'SET_ENDLESS_DAWN':0,        #9 for set
+    'SET_ENDLESS_DAWN':9,        #9 for set
     'TRP_SIR_LENUS':False,       #For Inspire
     'SET_JOVIAL_JESTER':0,       #9 for set
     'SET_CELEBRATION':0,         #9 for set
@@ -264,10 +265,79 @@ class Magic(object):
             #Finalize result of iteration
             if ((cls.magicStamp()[1].month-MAGICSLIST) == (cls.magicStamp()[0])):
                 sortdir = cls.magicStamp(curmagic)[0].magic_flag
+        # Initial sorting
         Magic.collateAverage(0)
         Magic.spelllist.sort(reverse=sortdir)
         Magic.collateAverage(SLOTNUM + MAGICLIST_EXTEND)
         Magic.spelllist.sort(reverse=sortdir)
+        #return
+        
+        #Iterate until there are no more spells to break apart
+        while (cls.spellBreakApart()): pass
+        #Remove all remaining multispells
+        #'''
+        for spell in Magic.spelllist[:]:
+            if spell.numspells > 1:
+                Magic.spelllist.remove(spell)
+        #'''
+        #Resort
+        Magic.collateAverage(SLOTNUM)
+        Magic.spelllist.sort(reverse=sortdir)
+        
+        
+    @classmethod
+    def spellBreakApart(cls):
+        global SPELLSPLITDEBUG
+        spellbroken = False
+        for idx,spell in enumerate(cls.spelllist[:SLOTNUM]):
+            if (SPELLSPLITDEBUG): print "Spell check: "+str(spell.fullname)
+            if spell.numspells == 2:
+                spellbroken = True
+                if (SPELLSPLITDEBUG): print "Double spell breakdown"
+                spell_A = spell.contains[0]
+                spell_B = spell.contains[1]
+                #Case 2: both magics are individually in list.
+                #Action: Remove the pair
+                if set(spell.contains).issubset(set(cls.spelllist[:SLOTNUM])):
+                    if (SPELLSPLITDEBUG): print "Both spells found"
+                    cls.spelllist.remove(spell)
+                #Case 1: One of the magics is in the list.
+                #Action: Complicated. Involves hidden class shenanigans
+                elif (set(spell.contains) & set(cls.spelllist[:SLOTNUM])):
+                    if spell_A in cls.spelllist[:SLOTNUM]:
+                        if (SPELLSPLITDEBUG): print "Spell A found"
+                        t = spell.getAvgSub(spell_B) + (cls.getAvgSub(spell_A) - spell.getAvgSub(spell_A))
+                        if t > cls.spelllist[:SLOTNUM][-1].getAvg():
+                            if (SPELLSPLITDEBUG): print "Spell B resorting to top"
+                            newspell = cls.spelllist.pop(cls.spelllist.index(spell_B))
+                            cls.spelllist.insert(newspell)
+                            cls.spelllist.remove(spell)
+                        else:
+                            if (SPELLSPLITDEBUG): print "Spell B didn't make it..."
+                            cls.spelllist.remove(spell)
+                    elif spell_B in cls.spelllist[:SLOTNUM]:
+                        if (SPELLSPLITDEBUG): print "Spell B found"
+                        t = spell.getAvgSub(spell_A) + (cls.getAvgSub(spell_B) - spell.getAvgSub(spell_B))
+                        if t > cls.spelllist[:SLOTNUM][-1].getAvg():
+                            if (SPELLSPLITDEBUG): print "Spell A resorting to top"
+                            newspell = cls.spelllist.pop(cls.spelllist.index(spell_A))
+                            cls.spelllist.insert(newspell)
+                            cls.spelllist.remove(spell)
+                        else:
+                            if (SPELLSPLITDEBUG): print "Spell A didn't make it..."
+                            cls.spelllist.remove(spell)
+                    else: sys.exit("Assert failure: Partial list exists in main")
+                #Case 0: None of the magics is in the list
+                #Action: Pop both single magic then shuffle to top. Remove pair.
+                else:
+                    if (SPELLSPLITDEBUG): print "None of the pair found"
+                    newspell = cls.spelllist.pop(cls.spelllist.index(spell_A))
+                    cls.spelllist.insert(newspell)
+                    newspell = cls.spelllist.pop(cls.spelllist.index(spell_B))
+                    cls.spelllist.insert(newspell)
+                    cls.spelllist.remove(spell)
+        return spellbroken
+        
         
     @staticmethod
     def getID(name_or_nick):
@@ -1938,7 +2008,7 @@ print MAIN_DIVIDER
 print "Raid magic, calc for tags: "+str(RAIDTAGS)
 print MAIN_DIVIDER
 
-#MetaMagic.fillMetaPairs()
+MetaMagic.fillMetaPairs()
 Magic.sortMagic()
 shortlist = ""
 for idx,spell in enumerate(Magic.spelllist[:SLOTNUM+MAGICLIST_EXTEND]):
