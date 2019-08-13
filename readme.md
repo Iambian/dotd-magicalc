@@ -15,6 +15,11 @@ This utility is designed to help find the best (and next-to-best) magic for any
 raid given its tags, which are supplied on the command-line, and the user's
 status and parameters (e.g. number of mounts owned) in the script itself.
 
+The default configuration for the script is for (mostly) f2p players who have
+been playing for a long (4+ years) time and have focused on obtaining premium
+troops/generals, while sometimes splurging a bit on NIPs and other special
+limited time events.
+
 How to use
 ----------
 If you haven't installed Python 2.7.x, install it now before going any further.
@@ -25,6 +30,10 @@ Open a command prompt in the directory/folder the script is and type
 
 * Where `N` is the number of magic slots the raid has
 * Where `T1` through `TN` aret he tags (e.g. orc, dragon, deadly, etc.) that the raid has.
+* `T1` through `TN` may also contain additional content which affects the script
+	* `profile=whale` sets the OWNED dictionary to max out everything. All the troops. All the items. All the everything.
+	* `profile=alt` sets the OWNED dictionary to have the sort of things that a general purpose raid summoning alt account may have. Also what a new player could have.
+	* `raremagic=true` allows for the use of rare magics
 
 Examples
 --------
@@ -40,8 +49,9 @@ the command-line:
 ---
 Example 2: You want to do the same with Deadly Vas'ok. It too has eight magic
 slots, but has a load more tags: `Deadly , Dragon , Shadow Elf , Magical Creature , Underground`
+The people who want to magic this raid also has the good stuff. Rare stuff.
 
-`python dotdmagi.py 8 deadly dragon shadowelf magicalcreature underground`
+`python dotdmagi.py 8 raremagic=true deadly dragon shadowelf magicalcreature underground`
 
 ---
 Example 3: You want to beat up poor Horgrak. Not even the deadly version, just
@@ -51,9 +61,22 @@ the poor, abused, oft-slaughtered kobold. He has two magic slots and no tags.
 
 ---
 Example 4: Someone gave you a link to a Deadly Black Hand Lieutenant, and it's
-your job to help magick it up. It has five magic slots and the tags `Black Hand , Winter , Human , Deadly`
+your job to help magick it up. It has five magic slots and the tags
+`Black Hand , Winter , Human , Deadly`. This privately shared raid is also going
+to be hit by a bunch of high-rolling people, so they'll want it magick'd up accordingly.
 
-`python dotdmagi.py 5 blackhand winter human deadly`
+`python dotdmagi.py 5 profile=whale blackhand winter human deadly`
+
+---
+Example 5: You have a bunch of alt accounts. They're poor and destitute, but you're
+trying to turn their lives around. So you summon up a Zugen in the hopes that they
+can nab that [Weaponsmith Scroll 5](https://dotd.fandom.com/wiki/Weaponsmith_Scroll_5).
+Thing is, you gotta pick magics that are friendly for the needy. This raid has
+just one tag: `Ogre`. It has four magic slots. Pick wisely!
+
+`python dotdmagi.py 4 profile=alt ogre`
+
+Or just let the script pick for you.
 
 ---
 

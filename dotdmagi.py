@@ -26,10 +26,13 @@ def checkDel(s):
 SHOWDEBUG = False
 DEBUGDOUBLES = False
 SPELLSPLITDEBUG = False
-USERAREMAGIC = False
 RAIDTAGS = [s.lower() for s in sys.argv[2:]]
 MAGICLIST = []
 MAGICLIST_EXTEND = 3
+
+if checkDel('raremagic=true'):  USERAREMAGIC = True
+else:                           USERAREMAGIC = False
+
 
 if checkDel('profile=whale') or checkDel('profile=wailord'):
     OWNED = {
@@ -449,8 +452,9 @@ class Magic(object):
         return self == other
     def __hash__(self):
         return self.id
+
     def __repr__(self):
-        return "[Magic: "+str(self.fullname)+"]"
+        return "[Magic: ("+str(self.id)+") "+str(self.fullname)+"]"
     def newTrig(self,triggertype,triggerdata):
         if not isinstance(triggerdata,(list,tuple)):
             triggerdata = [triggerdata]
@@ -706,8 +710,8 @@ class MetaMagic(Magic):
         Magic.magic_id += 1
         Magic.spelllist.append(self)
         self.spelllist = newspelllist  #the hack
-        
-    
+    def __repr__(self):
+        return "[MetaMagic: ("+str(self.id)+") "+str(self.fullname)+"]"
         
     #   This method fills Magic.spelllist with all metamagic
     #   pairs that have a castable synergy to them.
