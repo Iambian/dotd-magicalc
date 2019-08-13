@@ -18,6 +18,11 @@ try:
 except:
     SLOTNUM = 0
     EXTRAFUNC = sys.argv[1]
+def checkDel(s):
+    global RAIDTAGS
+    if s in RAIDTAGS:   return RAIDTAGS.remove(s) or True
+    else:               return False
+    
 SHOWDEBUG = False
 DEBUGDOUBLES = False
 SPELLSPLITDEBUG = False
@@ -26,120 +31,362 @@ RAIDTAGS = [s.lower() for s in sys.argv[2:]]
 MAGICLIST = []
 MAGICLIST_EXTEND = 3
 
-OWNED = {
-    'MOUNTS':432,
-    'LEGIONS':100,
-    'TROOPS':200,
-    'GENERALS':100,
-    ## number of magics owned. This value holds priority over length of SPELLS
-    'MAGICS':30,
-    ## SPELLS shows exactly what magics you own.
-    'SPELLS':['TotH',"IS","FS"],
-    'GIANTESSENCE':1,
-    'BEASTMANESSENCE':18,
-    'FESTIVALESSENCE':6,
-    'UNDERGROUNDESSENCE':35,
-    'PLANTESSENCE':0,
-    'DWARFTROOPS':44,
-    'DWARFGENERALS':18,
-    'MAGICALBEINGTROOPS':10,
-    'MAGICALBEINGGENERALS':10,
-    'OROCTROOPS':10,
-    'OROCGENERALS':5,
-    'DRAGONESSENCE':10,
-    'DRAGONMOUNTS':20,
-    "KATH'IN":False,   #For Fury of the Deep, since owning this gen affects it greatly.
-    'SCULPTEDCRYSTAL':0,
-    'HARVESTEDCRYSTAL':0,
-    ##
-    ## ok. i give. going to clutter up the space with set stuff now.
-    ##
-    'AUREATE_TROPHY':False,    #For gauntlet
-    'ARGENT_TROPHY':False,
-    'BRONZED_TROPHY':False,
-    'GEN_SMILING_SARAH':False, #For Blood Moon
-    'GEN_ZURK':False,
-    'GEN_KOLEMALU':False,
-    'GEN_RANINA':False,        #For Boil
-    'GEN_LAOCONS_GHOST':False,
-    'GEN_LORD_VERNE':False,
-    'GEN_CAPTAIN_TIPHANTES':False,
-    'GEN_FIRST_MATE_BRAEUS':False,
-    'SET_BATTLE_SCARRED':0,      #9 for set, +3 for other stuff that the spells want
-    'ARM_LIVING_FLAME':False,
-    'TRP_INCINERATED_SOLDIER':0, #Up to 50
-    'GEN_BURUT_THE_HUNGRY':False,  #For Consume. Part of many things.
-    'ITM_TURKEY_OF_PLENTY':0,    #Up to 5
-    'ITM_DEER_OF_PLENTY':0,      #Up to 5
-    'ITM_BEAR_OF_PLENTY':0,      #Up to 5
-    'ITM_BOAR_OF_PLENTY':0,      #Up to 5
-    'SET_ACIDIC_ARMOR':0,        #9 for set, +7 for other stuff wanted by Corrode
-    'GEN_HAIMISH':False,         #The following gens and 3 items for Deep Freeze
-    'GEN_OLD_DEAD_ELVIGAR':False,
-    'GEN_UTHIN':False,
-    'GEN_VILI':False,
-    'ITM_CRYSTAL_OF_THE_DEADLY_COLD':False,
-    'ITM_KINGSJAW':False,
-    'ITM_DARKES_SIGHT':False,
-    'SET_CURIOUS_CUIRASSIER':0,  #9 for set.
-    'TRP_WISH_WARRIOR':0,        #Up to 50
-    'ARM_ARCH_DJINNS_LAMP':False,
-    'SET_VEIL_WALKER':0,         #9 for set !!! Expected to have if own Doorway
-    'SET_DUNE_STALKER':0,        #9 for set
-    'GEN_MONSTER_FISHERMAN':False,
-    'ITM_FISH_HOOK':0,           #Up to 6 (for now). For (Enraged) Feeding Frenzy
-    'GEN_ILIAD_THE_RECORDER':False,  #For Eternal Sight
-    'GEN_PANOPTICA':False,
-    'GEN_PANOPTICA_THE_OMNISCIENT_ANGEL':False,
-    'GEN_BEIJA_THE_ERUDITE':False, #For Fatal Aim
-    'GEN_ESTREL_THE_JUST':False,
-    'GEN_HAWKER_THE_GENTEEL':False,
-    'GEN_GARKURA_THE_DREADNAUGHT':False, #For Fearless Advance
-    'GEN_ABIGAIL_PIETRI_PHINEAS':False,
-    'SET_KINDLY_FOLK':0,         #10 for set
-    'ITM_HOBBY_HORSE':0,         #Up to 10
-    'SET_IIRHINIAN_ARROW_MASTER':0, #9 for set
-    'SET_SNOW_WARRIOR':0,        #9 for set
-    'SET_SNOW_WARLORD':0,        #9 for set
-    'SET_SLEET_WARRIOR':0,       #9 for set
-    'SET_SNOW_FOX':0,            #9 for set
-    'SET_ENDLESS_DAWN':9,        #9 for set
-    'TRP_SIR_LENUS':False,       #For Inspire
-    'SET_JOVIAL_JESTER':0,       #9 for set
-    'SET_CELEBRATION':0,         #9 for set
-    'SET_FOREST_SENTINEL':0,     #9 for set
-    'ARM_SABIRAHS_ASHES':False,  #For Judgement
-    'ARM_CERMARINAS_BLADE':False,
-    'ITM_STORMSHIP':0,           #up to 50
-    'TRP_CLOUD_ELEMENTAL':0,     #up to 25
-    'GEN_PASITHEA':False,
-    'GEN_BELLEFOREST':False,
-    'GEN_ESCH':False,
-    'TRP_SLEEPLESS_SOLDIERS':50,  #Up to 50. You probably own them all already.
-    'TRP_GRIFFIN_CHAMPIONS':0,    #Up to 100
-    'SET_INFINITE_DAWN':0,        #10 for set
-    'GEN_SIR_JORIM':False,        #For Mystic Slaughterers
-    'SET_SPIRIT_RAVEN':0,         #9 for set. For Rally
-    'SET_RESURRECTION':0,         #9 for set +3 more as Resurrect wants
-    'GEN_SAR_VELANIA_THE_RED':False, #For Seven Unyielding. Yeah. THAT magic.
-    'GEN_SIR_BOHEMOND_THE_ORANGE':False,
-    'GEN_SIR_EMERIC_THE_YELLOW':False,
-    'GEN_SIR_AARON_THE_BLUE':False,
-    'GEN_SIR_COLBAEUS_THE_GREEN':False,
-    'GEN_SAR_MEURA_THE_INDIGO':False,
-    'GEN_SAR_WENNI_THE_VIOLET':False,
-    'SET_SHADOW-SLIP_ASSASSIN':0, #9 for set
-    'GEN_YING_OF_THE_SHATTERED_MOON':False, #For Shattered Moon
-    'SET_WEE_WARRIOR':0,          #9 for set
-    'SET_BRUTE_STRENGTH':0,       #9 for set
-    'TRP_GRAVE_GUARDIAN':0,       #Up to 50
-    'SET_WARRIOR_POET':0,         #9 for set
-    'SET_RISING_DAWN':0,          #10 for set
-    'SET_VIOLET_KNIGHT':0,        #9 for set
-    'SET_DEPTH_TERROR':0,         #10 for set
-    'ITM_LEGEND_OF_THE_DEMIGOD':False, #For lv10k magic
+if checkDel('profile=whale') or checkDel('profile=wailord'):
+    OWNED = {
+        'MOUNTS':432,
+        'LEGIONS':482,
+        'TROOPS':860,
+        'GENERALS':652,
+        ## number of magics owned. This value holds priority over length of SPELLS
+        'MAGICS':187,
+        ## SPELLS shows exactly what magics you own.
+        'SPELLS':["LitD","AF","anni","AM","AD","ava","beach","BF","BD","BS","BoM","BL","BM","boil","BT","BB","BR","CD","cata","CE","CKi","CC","conf","cons","cont","CEx","corr",
+            "CP","CoS","DF","DS","DE","DM","deep","dehum","desi","DD","disc","disi","dism","Dj","door","DB","DT","dup","elec","EFF","ES","exo","EW","EitD","FaF","FaA",
+            "FeA","FF","fey","fire","FS","FW","FIWL","FotD","GG","GM","GB","GID","GMT","GP","GuB","GF","GSR","hail","harm","HC","HvK","HK","hemo","hib","HSE","HN","howl",
+            "IS","ID","IB","IL","insp","int","intox","IG","judge","KG","KN","LID","LP","lev","LR","LD","LS","MD","MV","MG","MID","MRW","MoM","mel","melt","MT","MTS","MS",
+            "NK","NM","NB","OB","PB","PoL","P","pos","PL","puri","PS","QM","QSP","QKF","RT","RB","RD","rally","ref","RS","res","sand","sap","SaM","SE","7U","SS","SM",
+            "shrink","siphon","SMITE","SP","SoS","surv","SoL","TB","TK","TotH","typh","uni","VA","VD","VS","VotD","VR","VE","weight","WaS","WV","#1#","#2#","#3#","#4#"
+        ],
+        'GIANTESSENCE':9,
+        'BEASTMANESSENCE':22,
+        'FESTIVALESSENCE':11,
+        'UNDERGROUNDESSENCE':35,
+        'PLANTESSENCE':7,
+        'DWARFTROOPS':45,
+        'DWARFGENERALS':33,
+        'MAGICALBEINGTROOPS':62,
+        'MAGICALBEINGGENERALS':31,
+        'OROCTROOPS':34,
+        'OROCGENERALS':20,
+        'DRAGONESSENCE':40,
+        'DRAGONMOUNTS':49,
+        "KATH'IN":True,   #For Fury of the Deep, since owning this gen affects it greatly.
+        'SCULPTEDCRYSTAL':156,
+        'HARVESTEDCRYSTAL':667,
+        ##
+        'AUREATE_TROPHY':True,    #For gauntlet
+        'ARGENT_TROPHY':True,
+        'BRONZED_TROPHY':True,
+        'GEN_SMILING_SARAH':True, #For Blood Moon
+        'GEN_ZURK':True,
+        'GEN_KOLEMALU':True,
+        'GEN_RANINA':True,        #For Boil
+        'GEN_LAOCONS_GHOST':True,
+        'GEN_LORD_VERNE':True,
+        'GEN_CAPTAIN_TIPHANTES':True,
+        'GEN_FIRST_MATE_BRAEUS':True,
+        'SET_BATTLE_SCARRED':9,      #9 for set, +3 for other stuff that the spells want
+        'ARM_LIVING_FLAME':True,
+        'TRP_INCINERATED_SOLDIER':50, #Up to 50
+        'GEN_BURUT_THE_HUNGRY':True,  #For Consume. Part of many things.
+        'ITM_TURKEY_OF_PLENTY':5,    #Up to 5
+        'ITM_DEER_OF_PLENTY':5,      #Up to 5
+        'ITM_BEAR_OF_PLENTY':5,      #Up to 5
+        'ITM_BOAR_OF_PLENTY':5,      #Up to 5
+        'SET_ACIDIC_ARMOR':16,        #9 for set, +7 for other stuff wanted by Corrode
+        'GEN_HAIMISH':True,         #The following gens and 3 items for Deep Freeze
+        'GEN_OLD_DEAD_ELVIGAR':True,
+        'GEN_UTHIN':True,
+        'GEN_VILI':True,
+        'ITM_CRYSTAL_OF_THE_DEADLY_COLD':True,
+        'ITM_KINGSJAW':True,
+        'ITM_DARKES_SIGHT':True,
+        'SET_CURIOUS_CUIRASSIER':9,  #9 for set.
+        'TRP_WISH_WARRIOR':50,        #Up to 50
+        'ARM_ARCH_DJINNS_LAMP':True,
+        'SET_VEIL_WALKER':9,         #9 for set !!! Expected to have if own Doorway
+        'SET_DUNE_STALKER':9,        #9 for set
+        'GEN_MONSTER_FISHERMAN':True,
+        'ITM_FISH_HOOK':6,           #Up to 6 (for now). For (Enraged) Feeding Frenzy
+        'GEN_ILIAD_THE_RECORDER':True,  #For Eternal Sight
+        'GEN_PANOPTICA':True,
+        'GEN_PANOPTICA_THE_OMNISCIENT_ANGEL':True,
+        'GEN_BEIJA_THE_ERUDITE':True, #For Fatal Aim
+        'GEN_ESTREL_THE_JUST':True,
+        'GEN_HAWKER_THE_GENTEEL':True,
+        'GEN_GARKURA_THE_DREADNAUGHT':True, #For Fearless Advance
+        'GEN_ABIGAIL_PIETRI_PHINEAS':True,
+        'SET_KINDLY_FOLK':10,        #10 for set
+        'ITM_HOBBY_HORSE':10,        #Up to 10
+        'SET_IIRHINIAN_ARROW_MASTER':9, #9 for set
+        'SET_SNOW_WARRIOR':9,        #9 for set
+        'SET_SNOW_WARLORD':9,        #9 for set
+        'SET_SLEET_WARRIOR':9,       #9 for set
+        'SET_SNOW_FOX':9,            #9 for set
+        'SET_ENDLESS_DAWN':9,        #9 for set
+        'TRP_SIR_LENUS':True,       #For Inspire
+        'SET_JOVIAL_JESTER':9,       #9 for set
+        'SET_CELEBRATION':9,         #9 for set
+        'SET_FOREST_SENTINEL':9,     #9 for set
+        'ARM_SABIRAHS_ASHES':True,  #For Judgement
+        'ARM_CERMARINAS_BLADE':True,
+        'ITM_STORMSHIP':50,          #up to 50
+        'TRP_CLOUD_ELEMENTAL':25,     #up to 25
+        'GEN_PASITHEA':True,
+        'GEN_BELLEFOREST':True,
+        'GEN_ESCH':True,
+        'TRP_SLEEPLESS_SOLDIERS':50,  #Up to 50. You probably own them all already.
+        'TRP_GRIFFIN_CHAMPIONS':100,  #Up to 100
+        'SET_INFINITE_DAWN':10,       #10 for set
+        'GEN_SIR_JORIM':True,         #For Mystic Slaughterers
+        'SET_SPIRIT_RAVEN':9,         #9 for set. For Rally
+        'SET_RESURRECTION':12,        #9 for set +3 more as Resurrect wants
+        'GEN_SAR_VELANIA_THE_RED':True, #For Seven Unyielding. Yeah. THAT magic.
+        'GEN_SIR_BOHEMOND_THE_ORANGE':True,
+        'GEN_SIR_EMERIC_THE_YELLOW':True,
+        'GEN_SIR_AARON_THE_BLUE':True,
+        'GEN_SIR_COLBAEUS_THE_GREEN':True,
+        'GEN_SAR_MEURA_THE_INDIGO':True,
+        'GEN_SAR_WENNI_THE_VIOLET':True,
+        'SET_SHADOW-SLIP_ASSASSIN':0, #9 for set
+        'GEN_YING_OF_THE_SHATTERED_MOON':True, #For Shattered Moon
+        'SET_WEE_WARRIOR':9,          #9 for set
+        'SET_BRUTE_STRENGTH':9,       #9 for set
+        'TRP_GRAVE_GUARDIAN':50,      #Up to 50
+        'SET_WARRIOR_POET':9,         #9 for set
+        'SET_RISING_DAWN':10,         #10 for set
+        'SET_VIOLET_KNIGHT':9,        #9 for set
+        'SET_DEPTH_TERROR':10,        #10 for set
+        'ITM_LEGEND_OF_THE_DEMIGOD':True, #For lv10k magic
+        }
+    pass
     
-}
+elif checkDel('profile=alt'):
+    OWNED = {
+        'MOUNTS':50,
+        'LEGIONS':50,
+        'TROOPS':50,
+        'GENERALS':50,
+        ## number of magics owned. This value holds priority over length of SPELLS
+        'MAGICS':15,
+        ## SPELLS shows exactly what magics you own.
+        'SPELLS':["BB","dehum","disc","elec","GID","GMT","HC",
+            "ID","LID","LP","MT","MTS","NK","P","QM","VR","weight"
+        ],
+        'GIANTESSENCE':1,
+        'BEASTMANESSENCE':13,
+        'FESTIVALESSENCE':0,
+        'UNDERGROUNDESSENCE':18,
+        'PLANTESSENCE':0,
+        'DWARFTROOPS':5,
+        'DWARFGENERALS':5,
+        'MAGICALBEINGTROOPS':5,
+        'MAGICALBEINGGENERALS':5,
+        'OROCTROOPS':5,
+        'OROCGENERALS':5,
+        'DRAGONESSENCE':10,
+        'DRAGONMOUNTS':5,
+        "KATH'IN":False,   #For Fury of the Deep, since owning this gen affects it greatly.
+        'SCULPTEDCRYSTAL':0,
+        'HARVESTEDCRYSTAL':0,
+        ##
+        'AUREATE_TROPHY':False,    #For gauntlet
+        'ARGENT_TROPHY':False,
+        'BRONZED_TROPHY':True,
+        'GEN_SMILING_SARAH':False, #For Blood Moon
+        'GEN_ZURK':False,
+        'GEN_KOLEMALU':False,
+        'GEN_RANINA':False,        #For Boil
+        'GEN_LAOCONS_GHOST':False,
+        'GEN_LORD_VERNE':False,
+        'GEN_CAPTAIN_TIPHANTES':False,
+        'GEN_FIRST_MATE_BRAEUS':False,
+        'SET_BATTLE_SCARRED':0,      #9 for set, +3 for other stuff that the spells want
+        'ARM_LIVING_FLAME':False,
+        'TRP_INCINERATED_SOLDIER':0, #Up to 50
+        'GEN_BURUT_THE_HUNGRY':False,  #For Consume. Part of many things.
+        'ITM_TURKEY_OF_PLENTY':0,    #Up to 5
+        'ITM_DEER_OF_PLENTY':0,      #Up to 5
+        'ITM_BEAR_OF_PLENTY':0,      #Up to 5
+        'ITM_BOAR_OF_PLENTY':0,      #Up to 5
+        'SET_ACIDIC_ARMOR':0,        #9 for set, +7 for other stuff wanted by Corrode
+        'GEN_HAIMISH':False,          #The following gens and 3 items for Deep Freeze
+        'GEN_OLD_DEAD_ELVIGAR':False,
+        'GEN_UTHIN':False,
+        'GEN_VILI':False,
+        'ITM_CRYSTAL_OF_THE_DEADLY_COLD':False,
+        'ITM_KINGSJAW':False,
+        'ITM_DARKES_SIGHT':False,
+        'SET_CURIOUS_CUIRASSIER':0,  #9 for set.
+        'TRP_WISH_WARRIOR':0,        #Up to 50
+        'ARM_ARCH_DJINNS_LAMP':False,
+        'SET_VEIL_WALKER':0,         #9 for set !!! Expected to have if own Doorway
+        'SET_DUNE_STALKER':0,        #9 for set
+        'GEN_MONSTER_FISHERMAN':False,
+        'ITM_FISH_HOOK':0,           #Up to 6 (for now). For (Enraged) Feeding Frenzy
+        'GEN_ILIAD_THE_RECORDER':False,  #For Eternal Sight
+        'GEN_PANOPTICA':False,
+        'GEN_PANOPTICA_THE_OMNISCIENT_ANGEL':False,
+        'GEN_BEIJA_THE_ERUDITE':False, #For Fatal Aim
+        'GEN_ESTREL_THE_JUST':False,
+        'GEN_HAWKER_THE_GENTEEL':False,
+        'GEN_GARKURA_THE_DREADNAUGHT':False, #For Fearless Advance
+        'GEN_ABIGAIL_PIETRI_PHINEAS':False,
+        'SET_KINDLY_FOLK':0,         #10 for set
+        'ITM_HOBBY_HORSE':0,         #Up to 10
+        'SET_IIRHINIAN_ARROW_MASTER':0, #9 for set
+        'SET_SNOW_WARRIOR':0,        #9 for set
+        'SET_SNOW_WARLORD':0,        #9 for set
+        'SET_SLEET_WARRIOR':0,       #9 for set
+        'SET_SNOW_FOX':0,            #9 for set
+        'SET_ENDLESS_DAWN':0,        #9 for set
+        'TRP_SIR_LENUS':False,       #For Inspire
+        'SET_JOVIAL_JESTER':0,       #9 for set
+        'SET_CELEBRATION':0,         #9 for set
+        'SET_FOREST_SENTINEL':0,     #9 for set
+        'ARM_SABIRAHS_ASHES':False,  #For Judgement
+        'ARM_CERMARINAS_BLADE':False,
+        'ITM_STORMSHIP':0,          #up to 50
+        'TRP_CLOUD_ELEMENTAL':0,    #up to 25
+        'GEN_PASITHEA':False,
+        'GEN_BELLEFOREST':False,
+        'GEN_ESCH':False,
+        'TRP_SLEEPLESS_SOLDIERS':0,  #Up to 50. You probably own them all already.
+        'TRP_GRIFFIN_CHAMPIONS':0,    #Up to 100
+        'SET_INFINITE_DAWN':0,        #10 for set
+        'GEN_SIR_JORIM':False,        #For Mystic Slaughterers
+        'SET_SPIRIT_RAVEN':0,         #9 for set. For Rally
+        'SET_RESURRECTION':0,         #9 for set +3 more as Resurrect wants
+        'GEN_SAR_VELANIA_THE_RED':False, #For Seven Unyielding. Yeah. THAT magic.
+        'GEN_SIR_BOHEMOND_THE_ORANGE':False,
+        'GEN_SIR_EMERIC_THE_YELLOW':False,
+        'GEN_SIR_AARON_THE_BLUE':False,
+        'GEN_SIR_COLBAEUS_THE_GREEN':False,
+        'GEN_SAR_MEURA_THE_INDIGO':False,
+        'GEN_SAR_WENNI_THE_VIOLET':False,
+        'SET_SHADOW-SLIP_ASSASSIN':0, #9 for set
+        'GEN_YING_OF_THE_SHATTERED_MOON':False, #For Shattered Moon
+        'SET_WEE_WARRIOR':0,          #9 for set
+        'SET_BRUTE_STRENGTH':0,       #9 for set
+        'TRP_GRAVE_GUARDIAN':0,       #Up to 50
+        'SET_WARRIOR_POET':0,         #9 for set
+        'SET_RISING_DAWN':0,          #10 for set
+        'SET_VIOLET_KNIGHT':0,        #9 for set
+        'SET_DEPTH_TERROR':0,         #10 for set
+        'ITM_LEGEND_OF_THE_DEMIGOD':False, #For lv10k magic
+    }
+    
+else:
+## ==========================================================================
+##   This is the profile you want to edit if you want to change the default 
+## ==========================================================================
+    OWNED = {
+        'MOUNTS':432,
+        'LEGIONS':400,
+        'TROOPS':800,
+        'GENERALS':400,
+        ## number of magics owned. This value holds priority over length of SPELLS
+        'MAGICS':118,
+        ## SPELLS shows exactly what magics you own.
+        'SPELLS':["AF","anni","ava","beach","BF","BD","BL","boil","BB","BR","CD","cata","CE","CKi","conf","cont","CEx",
+            "CP","DF","DS","DE","DM","deep","dehum","disc","disi","dism","Dj","door","dup","elec","EFF","ES","exo","EitD","FaA",
+            "fire","FS","FotD","GG","GB","GID","GMT","GF","GSR","hail","harm","HC","HvK","HK","hemo","hib","HSE","HN","howl",
+            "IS","ID","IB","IL","insp","int","intox","IG","LID","LP","lev","LR","LD","MID","melt","MT","MTS","MS",
+            "NK","NM","NB","OB","PB","PoL","P","pos","PL","puri","PS","QM","QKF","RD","rally","RS","res","SaM","SE","7U","SS","SM",
+            "siphon","SP","SoL","TK","TotH","typh","uni","VA","VS","VR","VE","weight","WaS","WV","#1#","#2#","#3#"
+        ],
+        'GIANTESSENCE':9,
+        'BEASTMANESSENCE':22,
+        'FESTIVALESSENCE':11,
+        'UNDERGROUNDESSENCE':35,
+        'PLANTESSENCE':7,
+        'DWARFTROOPS':45,
+        'DWARFGENERALS':33,
+        'MAGICALBEINGTROOPS':62,
+        'MAGICALBEINGGENERALS':31,
+        'OROCTROOPS':34,
+        'OROCGENERALS':20,
+        'DRAGONESSENCE':40,
+        'DRAGONMOUNTS':49,
+        "KATH'IN":False,   #For Fury of the Deep, since owning this gen affects it greatly.
+        'SCULPTEDCRYSTAL':100,
+        'HARVESTEDCRYSTAL':500,
+        ##
+        'AUREATE_TROPHY':False,    #For gauntlet
+        'ARGENT_TROPHY':False,
+        'BRONZED_TROPHY':True,
+        'GEN_SMILING_SARAH':False, #For Blood Moon
+        'GEN_ZURK':False,
+        'GEN_KOLEMALU':False,
+        'GEN_RANINA':False,        #For Boil
+        'GEN_LAOCONS_GHOST':False,
+        'GEN_LORD_VERNE':False,
+        'GEN_CAPTAIN_TIPHANTES':False,
+        'GEN_FIRST_MATE_BRAEUS':False,
+        'SET_BATTLE_SCARRED':0,      #9 for set, +3 for other stuff that the spells want
+        'ARM_LIVING_FLAME':False,
+        'TRP_INCINERATED_SOLDIER':0, #Up to 50
+        'GEN_BURUT_THE_HUNGRY':False,  #For Consume. Part of many things.
+        'ITM_TURKEY_OF_PLENTY':2,    #Up to 5
+        'ITM_DEER_OF_PLENTY':2,      #Up to 5
+        'ITM_BEAR_OF_PLENTY':2,      #Up to 5
+        'ITM_BOAR_OF_PLENTY':5,      #Up to 5
+        'SET_ACIDIC_ARMOR':0,        #9 for set, +7 for other stuff wanted by Corrode
+        'GEN_HAIMISH':True,          #The following gens and 3 items for Deep Freeze
+        'GEN_OLD_DEAD_ELVIGAR':True,
+        'GEN_UTHIN':True,
+        'GEN_VILI':True,
+        'ITM_CRYSTAL_OF_THE_DEADLY_COLD':True,
+        'ITM_KINGSJAW':True,
+        'ITM_DARKES_SIGHT':True,
+        'SET_CURIOUS_CUIRASSIER':0,  #9 for set.
+        'TRP_WISH_WARRIOR':0,        #Up to 50
+        'ARM_ARCH_DJINNS_LAMP':False,
+        'SET_VEIL_WALKER':0,         #9 for set !!! Expected to have if own Doorway
+        'SET_DUNE_STALKER':0,        #9 for set
+        'GEN_MONSTER_FISHERMAN':True,
+        'ITM_FISH_HOOK':6,           #Up to 6 (for now). For (Enraged) Feeding Frenzy
+        'GEN_ILIAD_THE_RECORDER':True,  #For Eternal Sight
+        'GEN_PANOPTICA':True,
+        'GEN_PANOPTICA_THE_OMNISCIENT_ANGEL':True,
+        'GEN_BEIJA_THE_ERUDITE':True, #For Fatal Aim
+        'GEN_ESTREL_THE_JUST':True,
+        'GEN_HAWKER_THE_GENTEEL':True,
+        'GEN_GARKURA_THE_DREADNAUGHT':False, #For Fearless Advance
+        'GEN_ABIGAIL_PIETRI_PHINEAS':False,
+        'SET_KINDLY_FOLK':0,         #10 for set
+        'ITM_HOBBY_HORSE':0,         #Up to 10
+        'SET_IIRHINIAN_ARROW_MASTER':0, #9 for set
+        'SET_SNOW_WARRIOR':9,        #9 for set
+        'SET_SNOW_WARLORD':9,        #9 for set
+        'SET_SLEET_WARRIOR':9,       #9 for set
+        'SET_SNOW_FOX':0,            #9 for set
+        'SET_ENDLESS_DAWN':9,        #9 for set
+        'TRP_SIR_LENUS':False,       #For Inspire
+        'SET_JOVIAL_JESTER':0,       #9 for set
+        'SET_CELEBRATION':0,         #9 for set
+        'SET_FOREST_SENTINEL':9,     #9 for set
+        'ARM_SABIRAHS_ASHES':False,  #For Judgement
+        'ARM_CERMARINAS_BLADE':False,
+        'ITM_STORMSHIP':50,          #up to 50
+        'TRP_CLOUD_ELEMENTAL':25,    #up to 25
+        'GEN_PASITHEA':False,
+        'GEN_BELLEFOREST':False,
+        'GEN_ESCH':False,
+        'TRP_SLEEPLESS_SOLDIERS':50,  #Up to 50. You probably own them all already.
+        'TRP_GRIFFIN_CHAMPIONS':0,    #Up to 100
+        'SET_INFINITE_DAWN':0,        #10 for set
+        'GEN_SIR_JORIM':False,        #For Mystic Slaughterers
+        'SET_SPIRIT_RAVEN':9,         #9 for set. For Rally
+        'SET_RESURRECTION':0,         #9 for set +3 more as Resurrect wants
+        'GEN_SAR_VELANIA_THE_RED':True, #For Seven Unyielding. Yeah. THAT magic.
+        'GEN_SIR_BOHEMOND_THE_ORANGE':True,
+        'GEN_SIR_EMERIC_THE_YELLOW':True,
+        'GEN_SIR_AARON_THE_BLUE':True,
+        'GEN_SIR_COLBAEUS_THE_GREEN':True,
+        'GEN_SAR_MEURA_THE_INDIGO':True,
+        'GEN_SAR_WENNI_THE_VIOLET':True,
+        'SET_SHADOW-SLIP_ASSASSIN':0, #9 for set
+        'GEN_YING_OF_THE_SHATTERED_MOON':True, #For Shattered Moon
+        'SET_WEE_WARRIOR':0,          #9 for set
+        'SET_BRUTE_STRENGTH':0,       #9 for set
+        'TRP_GRAVE_GUARDIAN':0,       #Up to 50
+        'SET_WARRIOR_POET':0,         #9 for set
+        'SET_RISING_DAWN':0,          #10 for set
+        'SET_VIOLET_KNIGHT':0,        #9 for set
+        'SET_DEPTH_TERROR':0,         #10 for set
+        'ITM_LEGEND_OF_THE_DEMIGOD':True, #For lv10k magic
+    }
 MAGICSLIST = 3
 if EXTRAFUNC == 'showparams':
     print "Showing internal parameters of magic calc, dict: OWNED"
@@ -202,7 +449,8 @@ class Magic(object):
         return self == other
     def __hash__(self):
         return self.id
-        
+    def __repr__(self):
+        return "[Magic: "+str(self.fullname)+"]"
     def newTrig(self,triggertype,triggerdata):
         if not isinstance(triggerdata,(list,tuple)):
             triggerdata = [triggerdata]
@@ -385,6 +633,7 @@ class Magic(object):
         if spell.israre and not USERAREMAGIC:
             return float('inf') if EXTRAFUNC == 'pessimal' else 0
         #print "Proclist: "+str(self.proclist)
+        if SHOWDEBUG: print "-----------------------"
         for procs in spell.proclist:
             procrate = procs[0]
             if SHOWDEBUG: print "procrate: "+str(procrate)+", numprocs in this rate: "+str(len(procs[1]))
@@ -412,16 +661,17 @@ class Magic(object):
                             triggered += 1
                             break
                 if 'spellowned' in triggers:
-                    for magic in OWNED['SPELLS']:
-                        id = self.getID(magic)
-                        data = triggers['spellowned']
-                        #convert spell names into IDs to membership test against
-                        for i in range(len(data)):
-                            if isinstance(data[i],str):
-                                data[i] = self.getID(data[i])
-                        if id in data:
-                            triggered += 1
-                            break
+                    data = triggers['spellowned']
+                    if isinstance(OWNED['SPELLS'][0],str):
+                        for idx,repl in enumerate(OWNED['SPELLS']):
+                            OWNED['SPELLS'][idx] = Magic.getSpell(self.getID(repl))
+                    for i in range(len(data)):
+                        if isinstance(data[i],str):
+                            data[i] = self.getID(data[i])
+                        if isinstance(data[i],int):
+                            data[i] = Magic.getSpell(data[i])
+                    if set(data).issubset(set(OWNED['SPELLS'])):
+                        triggered += 1
                 #
                 #add in other trigger conditions
                 #
@@ -663,13 +913,6 @@ m.newProc(5)
 m = Magic("Burning Rain","BR")
 m.newDmg(3)
 m.newProc(100)
-#
-'''
-m = Magic("Buster 2.0","B2")
-m.setrare()
-m.newDmg(float('nan'))
-m.newProc(float('nan')) # ...
-'''
 #
 m = Magic("Cast Down","CD")
 m.newTrigTag('dragon')
@@ -1329,12 +1572,6 @@ m.newDmg(3)
 m.newProc(100)
 # Omitted Mad Marcia's Momentary Massacre for same reason as Battousai
 #
-'''
-m = Magic("Magic Torch","torch") ## haha
-m.newDmg(float('nan'))
-m.newProc(float('nan'))
-'''
-#
 m = Magic("Manifest Dread","MD")
 m.newDmg(50)
 m.newDmg( lambda : 3 * min(OWNED['TRP_SLEEPLESS_SOLDIERS'],50) )
@@ -1872,13 +2109,6 @@ m.newTrigTag('dragon')
 m.newDmg(250)
 m.newProc(20)
 #
-'''
-m = Magic("Wish","wish")
-m.setrare()
-m.newDmg(float('NaN'))
-m.newProc(float('NaN'))
-'''
-#
 m = Magic("Wolpertinger Venom","WV")
 m.newDmg(15)
 m.newTrig('spellowned',"Death Echo")
@@ -1917,10 +2147,10 @@ m.newDmg( lambda : 200 * OWNED['ITM_LEGEND_OF_THE_DEMIGOD'] )
 m.newProc(20)
 #
 m = Magic("[LV 20,000]","#4#")
+m.setrare()
 m.newDmg(50)
 m.newDmg( lambda : math.floor(OWNED['MAGICS'] / 3) )
 m.newProc(100)
-
 
 
 
