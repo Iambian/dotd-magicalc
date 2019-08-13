@@ -19,6 +19,7 @@ except:
     SLOTNUM = 0
     EXTRAFUNC = sys.argv[1]
 SHOWDEBUG = False
+DEBUGDOUBLES = True
 SPELLSPLITDEBUG = True
 USERAREMAGIC = False
 RAIDTAGS = [s.lower() for s in sys.argv[2:]]
@@ -37,7 +38,7 @@ OWNED = {
     'GIANTESSENCE':1,
     'BEASTMANESSENCE':18,
     'FESTIVALESSENCE':6,
-    'UNDERGROUNDESSENCE':15,
+    'UNDERGROUNDESSENCE':35,
     'PLANTESSENCE':0,
     'DWARFTROOPS':44,
     'DWARFGENERALS':18,
@@ -310,7 +311,7 @@ class Magic(object):
                         if t > cls.spelllist[:SLOTNUM][-1].getAvg():
                             if (SPELLSPLITDEBUG): print "Spell B resorting to top"
                             newspell = cls.spelllist.pop(cls.spelllist.index(spell_B))
-                            cls.spelllist.insert(newspell)
+                            cls.spelllist.insert(0,newspell)
                             cls.spelllist.remove(spell)
                         else:
                             if (SPELLSPLITDEBUG): print "Spell B didn't make it..."
@@ -321,7 +322,7 @@ class Magic(object):
                         if t > cls.spelllist[:SLOTNUM][-1].getAvg():
                             if (SPELLSPLITDEBUG): print "Spell A resorting to top"
                             newspell = cls.spelllist.pop(cls.spelllist.index(spell_A))
-                            cls.spelllist.insert(newspell)
+                            cls.spelllist.insert(0,newspell)
                             cls.spelllist.remove(spell)
                         else:
                             if (SPELLSPLITDEBUG): print "Spell A didn't make it..."
@@ -331,10 +332,10 @@ class Magic(object):
                 #Action: Pop both single magic then shuffle to top. Remove pair.
                 else:
                     if (SPELLSPLITDEBUG): print "None of the pair found"
-                    newspell = cls.spelllist.pop(cls.spelllist.index(spell_A))
-                    cls.spelllist.insert(newspell)
-                    newspell = cls.spelllist.pop(cls.spelllist.index(spell_B))
-                    cls.spelllist.insert(newspell)
+                    newspell_A = cls.spelllist.pop(cls.spelllist.index(spell_A))
+                    newspell_B = cls.spelllist.pop(cls.spelllist.index(spell_B))
+                    cls.spelllist.insert(0,newspell_A)
+                    cls.spelllist.insert(0,newspell_B)
                     cls.spelllist.remove(spell)
         return spellbroken
         
@@ -437,6 +438,7 @@ class MetaMagic(Magic):
     #   pairs that have a castable synergy to them.
     @classmethod
     def fillMetaPairs(cls):
+        global DEBUGDOUBLES
         # Iterate through all spells
         for idx,spell in enumerate(Magic.spelllist):
             if len(spell.contains) > 1: continue #Do not process metaspells
@@ -450,7 +452,11 @@ class MetaMagic(Magic):
                             break
                     else:
                         #This runs if the loop passes through without collision
-                        MetaMagic(pair[0].id,pair[1].id)
+                        m = MetaMagic(pair[0].id,pair[1].id)
+                        m.collateAverage(2)
+                        if DEBUGDOUBLES: print "Spell pair: "+str(m.fullname)+" at average "+str(m.avgfound)
+                        pass
+                        
             
         
     #Generator that returns Magic objects that contain spells listed in
