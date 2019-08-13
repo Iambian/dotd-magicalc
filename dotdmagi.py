@@ -19,8 +19,8 @@ except:
     SLOTNUM = 0
     EXTRAFUNC = sys.argv[1]
 SHOWDEBUG = False
-DEBUGDOUBLES = True
-SPELLSPLITDEBUG = True
+DEBUGDOUBLES = False
+SPELLSPLITDEBUG = False
 USERAREMAGIC = False
 RAIDTAGS = [s.lower() for s in sys.argv[2:]]
 MAGICLIST = []
@@ -274,21 +274,37 @@ class Magic(object):
         #return
         
         #Iterate until there are no more spells to break apart
+        cls.stickyspells = []
         while (cls.spellBreakApart()): pass
+        cls.stickyspells = list(set(cls.stickyspells))  #remove duplicates
         #Remove all remaining multispells
         #'''
         for spell in Magic.spelllist[:]:
             if spell.numspells > 1:
                 Magic.spelllist.remove(spell)
         #'''
+        #Move stickies to the end of the list
+        #print [s.fullname for s in cls.stickyspells]
+        for sticky in cls.stickyspells:
+            #print sticky.fullname
+            if sticky in Magic.spelllist:
+                Magic.spelllist.remove(sticky)
+            Magic.spelllist.insert(0,sticky)
+        cls.stickyspells = Magic.spelllist[:SLOTNUM]
+        cls.stickyspells.sort(reverse=sortdir)
+        Magic.spelllist = Magic.stickyspells + Magic.spelllist[SLOTNUM:]
+        
         #Resort
+        '''
         Magic.collateAverage(SLOTNUM)
         Magic.spelllist.sort(reverse=sortdir)
+        '''
         
         
     @classmethod
     def spellBreakApart(cls):
         global SPELLSPLITDEBUG
+        self = Magic.getSpell(1)  #using this for access to Magic.spelllist
         spellbroken = False
         for idx,spell in enumerate(cls.spelllist[:SLOTNUM]):
             if (SPELLSPLITDEBUG): print "Spell check: "+str(spell.fullname)
@@ -306,23 +322,29 @@ class Magic(object):
                 #Action: Complicated. Involves hidden class shenanigans
                 elif (set(spell.contains) & set(cls.spelllist[:SLOTNUM])):
                     if spell_A in cls.spelllist[:SLOTNUM]:
-                        if (SPELLSPLITDEBUG): print "Spell A found"
-                        t = spell.getAvgSub(spell_B) + (cls.getAvgSub(spell_A) - spell.getAvgSub(spell_A))
+                        if (SPELLSPLITDEBUG):
+                            print "Spell A found"
+                            print spell.getAvgSub(spell_B)
+                            print self.getAvgSub(spell_A)
+                            print spell.getAvgSub(spell_A)
+                        t = spell.getAvgSub(spell_B) + (self.getAvgSub(spell_A) - spell.getAvgSub(spell_A))
                         if t > cls.spelllist[:SLOTNUM][-1].getAvg():
-                            if (SPELLSPLITDEBUG): print "Spell B resorting to top"
-                            newspell = cls.spelllist.pop(cls.spelllist.index(spell_B))
-                            cls.spelllist.insert(0,newspell)
+                            if (SPELLSPLITDEBUG): print "Spell B stickied"
+                            cls.stickyspells.append(spell_B)
                             cls.spelllist.remove(spell)
                         else:
                             if (SPELLSPLITDEBUG): print "Spell B didn't make it..."
                             cls.spelllist.remove(spell)
                     elif spell_B in cls.spelllist[:SLOTNUM]:
-                        if (SPELLSPLITDEBUG): print "Spell B found"
-                        t = spell.getAvgSub(spell_A) + (cls.getAvgSub(spell_B) - spell.getAvgSub(spell_B))
+                        if (SPELLSPLITDEBUG): 
+                            print "Spell B found"
+                            print spell.getAvgSub(spell_A)
+                            print self.getAvgSub(spell_B)
+                            print spell.getAvgSub(spell_B)
+                        t = spell.getAvgSub(spell_A) + (self.getAvgSub(spell_B) - spell.getAvgSub(spell_B))
                         if t > cls.spelllist[:SLOTNUM][-1].getAvg():
-                            if (SPELLSPLITDEBUG): print "Spell A resorting to top"
-                            newspell = cls.spelllist.pop(cls.spelllist.index(spell_A))
-                            cls.spelllist.insert(0,newspell)
+                            if (SPELLSPLITDEBUG): print "Spell A stickied"
+                            cls.spelllist.append(spell_A)
                             cls.spelllist.remove(spell)
                         else:
                             if (SPELLSPLITDEBUG): print "Spell A didn't make it..."
@@ -334,8 +356,8 @@ class Magic(object):
                     if (SPELLSPLITDEBUG): print "None of the pair found"
                     newspell_A = cls.spelllist.pop(cls.spelllist.index(spell_A))
                     newspell_B = cls.spelllist.pop(cls.spelllist.index(spell_B))
-                    cls.spelllist.insert(0,newspell_A)
-                    cls.spelllist.insert(0,newspell_B)
+                    cls.stickyspells.append(newspell_A)
+                    cls.stickyspells.append(newspell_B)
                     cls.spelllist.remove(spell)
         return spellbroken
         
@@ -354,15 +376,16 @@ class Magic(object):
             averages.append(self.getAvgSub(spell))
         return sum(averages)/len(averages)
         
-    @staticmethod
-    def getAvgSub(spell):
+    def getAvgSub(self,spell):
         global RAIDTAGS,OWNED,USERAREMAGIC,SHOWDEBUG,SLOTNUM,EXTRAFUNC
-        self = spell     #make it so each spell instance is usable
+        #self = spell     #make it so each spell instance is usable
+        if isinstance(spell,str):   spell = self.getID(spell)
+        if isinstance(spell,int):   spell = self.getSpell(spell)
         curproctotal = 0
-        if self.israre and not USERAREMAGIC:
+        if spell.israre and not USERAREMAGIC:
             return float('inf') if EXTRAFUNC == 'pessimal' else 0
         #print "Proclist: "+str(self.proclist)
-        for procs in self.proclist:
+        for procs in spell.proclist:
             procrate = procs[0]
             if SHOWDEBUG: print "procrate: "+str(procrate)+", numprocs in this rate: "+str(len(procs[1]))
             for proc in procs[1]:
@@ -379,7 +402,7 @@ class Magic(object):
                             triggered += 1
                             break
                 if 'spellcast' in triggers:
-                    for magic in Magic.spelllist[:SLOTNUM]:
+                    for magic in self.spelllist[:SLOTNUM]:
                         data = triggers['spellcast']
                         #convert spell names into IDs to membership test against
                         for i in range(len(data)):
@@ -433,6 +456,8 @@ class MetaMagic(Magic):
         Magic.magic_id += 1
         Magic.spelllist.append(self)
         self.spelllist = newspelllist  #the hack
+        
+    
         
     #   This method fills Magic.spelllist with all metamagic
     #   pairs that have a castable synergy to them.
