@@ -30,10 +30,11 @@ Open a command prompt in the directory/folder the script is and type
 
 * Where `N` is the number of magic slots the raid has
 * Where `T1` through `TN` aret he tags (e.g. orc, dragon, deadly, etc.) that the raid has.
-* `T1` through `TN` may also contain additional content which affects the script
+* `T1` through `TN` may also contain additional options which affects the script
 	* `profile=whale` sets the OWNED dictionary to max out everything. All the troops. All the items. All the everything.
-	* `profile=alt` sets the OWNED dictionary to have the sort of things that a general purpose raid summoning alt account may have. Also what a new player could have.
+	* `profile=alt` sets the OWNED dictionary to have the sort of things that a general purpose raid summoning alt account may have. Also what a new(-ish) player could have.
 	* `raremagic=true` allows for the use of rare magics
+	* `avgmode=max` changes optimization to highest proc damage, for leaderboard hits.
 
 Examples
 --------
@@ -79,12 +80,21 @@ just one tag: `Ogre`. It has four magic slots. Pick wisely!
 Or just let the script pick for you.
 
 ---
+Example 6: Someone gave you a link to a private Deadly Erebus and they want you
+to help out with magic. Thing is, they want to keep it under wraps so they can
+work it for leaderboard (Destroyers) hits. This raid has 10 magic slots and the
+tags `Deadly, Dragon`, and you can safely assume that the guys hitting this raid
+are totally tricked out.
+
+`python dotdmagi.py 10 avgmode=max profile=whale deadly dragon`
+
+---
 
 Modifying What The Script Assumes You Own
 -----------------------------------------
-Open up `dotdmagi.py' and scroll down to the line that starts with
+Open up `dotdmagi.py` and scroll down to the line that starts with
 
-`OWNED = {'
+`OWNED = {`
 
 Below it are the entries full of stuff which the script uses to calculate procs
 with based on what you own.
@@ -92,20 +102,16 @@ with based on what you own.
 `'SPELLS'` is a list of all the magic you own. You can either use abbreviations
 or full names.
 
-Entries which contain either "True" (you own this item) or "False" (you do
-not own this item) should only ever contain that.
+Entries which contain either `True` (you own this item) or `False` (you do
+not own this item) should only have one of those two options.
 
 Entries which contains numbers may only be non-negative whole numbers.
 
 Known Issues (Script)
 ---------------------
-* Magics that are heavily reliant on other cast magics, such as the Enigma type
-  magic, may show up incorrectly in some cases due to list extension. This
-  very problem is why I don't broadly share this utility, and it's not an easy
-  one to solve. This can be partially mitigated by changing the `MAGICLIST_EXTEND`
-  variable in the script to a lower number. In other cases, pairs that should
-  show up but don't is because one or the other are unable to make the list
-  on their own merits, and is thus considered not cast.
+* Magics that depend on other magics being cast may not return correctly. Work
+  has been done to solve this, but no rigorous testing has been done. Be aware
+  of this possibility.
   
 Known Issues (Magic)
 ---------------------
@@ -115,7 +121,7 @@ Known Issues (Magic)
   available input, not available, or not usable.
 * Beastmaster was simplified such that the script assumes your herd of mounts
   individually is at least 10,000 strong. That isn't hard to do these days.
-* Abbreviations/nicknames were altered due to collisisons:
+* Abbreviations/nicknames were altered due to collisions:
 	* "Guilbert's Banquet" renamed "GuB" due to Gravebane (GB) existing.
 	* "Heaven's Kiss" was renamed (by PureEnergy, thanks a lot) "HvK" (despite
 	  "HKi" making more sense). This avoids collision with Hell's Knell (HK).
@@ -126,6 +132,13 @@ Known Issues (Magic)
 	  as of yet no raid that has both tags)
     * "Shadowstep" was given "SS" although "Shadow Strike" made more sense. It is
 	  this way only because the latter magic was omitted (see further above).
+	* There are three magics that could have been abbreviated as "dis", which are
+	  "Disintegrate", "Dismantle", and "Discord". Those were abbreviated as
+	  "disi", "dism", and "disc", respectively.
+* The magics you get at levels 2500, 5000, 10000, and 20000 are not given names
+  since they depend on the platform you play on. They are instead listed as the
+  level in which you get those magics. It is up to you to interpret them under
+  the correct name.
 	  
 License
 -------
@@ -138,6 +151,10 @@ Version History
         complete as I want it to be. For now.
 * 0.3 - Edited procs for additional correctness. Made tag input on command-line
         case-insensitive. Made the instructions more readable/skimmable.
+* 0.4 - An easter egg was added. Performance was improved on very long `OWNED['SPELLS']`
+		lists. Work was done to try to solve the problem of calculating cast magic
+		synergies. Profiles added. A toggle to allow use of rare magics added. Added
+		a switch to allow optimization for leaderboard hits.
 		
 		
 		
