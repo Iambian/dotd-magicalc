@@ -31,7 +31,7 @@ Open a command prompt in the directory/folder the script is and type
 * Where `N` is the number of magic slots the raid has
 * Where `T1` through `TN` aret he tags (e.g. orc, dragon, deadly, etc.) that the raid has.
 * `T1` through `TN` may also contain additional options which affects the script
-	* `profile=whale` sets the OWNED dictionary to max out everything. All the troops. All the items. All the everything.
+	* `profile=maxed` sets the OWNED dictionary to max out everything. All the troops. All the items. All the everything.
 	* `profile=alt` sets the OWNED dictionary to have the sort of things that a general purpose raid summoning alt account may have. Also what a new(-ish) player could have.
 	* `raremagic=true` allows for the use of rare magics
 	* `avgmode=max` changes optimization to highest proc damage, for leaderboard hits.
@@ -66,7 +66,7 @@ your job to help magick it up. It has five magic slots and the tags
 `Black Hand , Winter , Human , Deadly`. This privately shared raid is also going
 to be hit by a bunch of high-rolling people, so they'll want it magick'd up accordingly.
 
-`python dotdmagi.py 5 profile=whale blackhand winter human deadly`
+`python dotdmagi.py 5 profile=maxed blackhand winter human deadly`
 
 ---
 Example 5: You have a bunch of alt accounts. They're poor and destitute, but you're
@@ -86,7 +86,7 @@ work it for leaderboard (Destroyers) hits. This raid has 10 magic slots and the
 tags `Deadly, Dragon`, and you can safely assume that the guys hitting this raid
 are totally tricked out.
 
-`python dotdmagi.py 10 avgmode=max profile=whale deadly dragon`
+`python dotdmagi.py 10 avgmode=max profile=maxed deadly dragon`
 
 ---
 
@@ -151,7 +151,7 @@ Version History
         complete as I want it to be. For now.
 * 0.3 - Edited procs for additional correctness. Made tag input on command-line
         case-insensitive. Made the instructions more readable/skimmable.
-* 0.4 - An easter egg was added. Performance was improved on very long `OWNED['SPELLS']`
+* 0.4 - Easter egg(s) w(as|ere) added. Performance was improved on very long `OWNED['SPELLS']`
 		lists. Work was done to try to solve the problem of calculating cast magic
 		synergies. Profiles added. A toggle to allow use of rare magics added. Added
 		a switch to allow optimization for leaderboard hits.

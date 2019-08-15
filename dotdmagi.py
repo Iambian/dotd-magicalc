@@ -160,7 +160,7 @@ else:                           USERAREMAGIC = False
 if checkDel('avgmode=max'): AVGMODE = 'max'
 else:                       AVGMODE = 'avg'
 
-if checkDel('profile=whale') or checkDel('profile=wailord'):
+if checkDel('profile=maxed') or checkDel('profile=whale') or checkDel('profile=wailord'):
     OWNED = {
         'MOUNTS':432,
         'LEGIONS':482,
