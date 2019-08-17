@@ -480,6 +480,13 @@ class Magic(object):
     
         
     @staticmethod
+    def getID(name_or_nick):
+        name_or_nick = name_or_nick.lower()
+        for spell in Magic.spelllist:
+            if name_or_nick in [spell.fullname.lower(),spell.nickname.lower()]:
+                return spell.id
+        return 0
+    @staticmethod
     def getSpell(spellid):
         for i in Magic.spelllist:
             if i.id == spellid:
@@ -619,14 +626,6 @@ class Magic(object):
                     cls.stickyspells.append(newspell_B)
                     cls.spelllist.remove(spell)
         return spellbroken
-        
-        
-    @staticmethod
-    def getID(name_or_nick):
-        for spell in Magic.spelllist:
-            if name_or_nick == spell.fullname or name_or_nick == spell.nickname:
-                return spell.id
-        return 0
         
     def getAvg(self):
         global EXTRAFUNC,AVGMODE
@@ -2184,6 +2183,91 @@ m.newDmg( lambda : math.floor(OWNED['MAGICS'] / 3) )
 m.newProc(100)
 
 
+
+if isinstance(EXTRAFUNC,str) and 'find=' in EXTRAFUNC:
+    import inspect
+    searchterm = EXTRAFUNC[5:]
+    SLOTNUM = 0
+    MetaMagic.fillMetaPairs()
+    Magic.sortMagic()
+    id = Magic.getID(searchterm)
+    if not id:
+        print "\nSpell not found: "+str(searchterm)
+        print "Did you make sure that the spell is correctly spelled and/or"
+        print "that you enclosed any spells in matching quotation marks?\n"
+        sys.exit()
+    spell = Magic.getSpell(id)
+    if spell and spell.id:
+        print '-----------------------------------------------------'
+        print "Match found for search term: "+str(searchterm)
+        print "Spell name/abbreviation: "+str(spell.fullname)+", "+str(spell.nickname)
+        print "Internal object :"+str(spell)
+        print '-----------------------------------------------------'
+    sys.exit()
+
+if isinstance(EXTRAFUNC,str) and 'proc=' in EXTRAFUNC:
+    import inspect
+    searchterm = EXTRAFUNC[5:]
+    SLOTNUM = 0
+    MetaMagic.fillMetaPairs()
+    Magic.sortMagic()
+    id = Magic.getID(searchterm)
+    if not id:
+        print "\nSpell not found: "+str(searchterm)
+        print "Did you make sure that the spell is correctly spelled and/or"
+        print "that you enclosed any spells in matching quotation marks?\n"
+        sys.exit()
+    spell = Magic.getSpell(id)
+    if spell and spell.id:
+        print '-----------------------------------------------------'
+        print "Match found for search term: "+str(searchterm)
+        print "Spell name/abbreviation: "+str(spell.fullname)+", "+str(spell.nickname)
+        print '---'
+        for idx1,procs in enumerate(spell.proclist):
+            procrate = procs[0]
+            print "Proc "+str(idx1+1)+" of "+str(len(spell.proclist))+" at "+str(procrate)+"% proc rate"
+            proctotal = 0
+            unconditionalprocs = 0
+            for idx2,proc in enumerate(procs[1]):
+                procdamage = proc[0]
+                triggers = proc[1]
+                if 'none' in triggers or not len(triggers):
+                    if callable(procdamage):
+                        print "    Unconditional calculated proc:"
+                        print "    "+str(inspect.getsource(procdamage))
+                        proctotal += procdamage()
+                        unconditionalprocs += procdamage()
+                    else:
+                        print "    Unconditional proc damage: "+str(procdamage)+"%"
+                        proctotal += procdamage
+                        unconditionalprocs += procdamage
+                else:
+                    for idx3,(trigger,data) in enumerate(triggers.items()):
+                        if trigger=='raidtag':
+                            print "    Trigger "+str(idx3+1)+" of "+str(len(triggers))+" on any of these raid tags: "+str(data)
+                        if trigger=='spellowned':
+                            print "    Trigger "+str(idx3+1)+" of "+str(len(triggers))+" on any of these spells owned:"
+                            for sname in data:
+                                print "        "+str(sname)
+                        if trigger=='spellcast':
+                            print "    Trigger "+str(idx3+1)+" of "+str(len(triggers))+" on any of these spells cast:"
+                            for sname in data:
+                                print "        "+str(sname)
+                    if len(triggers)==1: s = " trigger is "
+                    else:                s = " triggers are "
+                    if callable(procdamage):
+                        print "    Causes the calculated damage below if above"+s+"true"
+                        print "    "+str(inspect.getsource(procdamage))
+                        proctotal += procdamage()
+                    else:
+                        print "    Causes "+str(procdamage)+"% damage if above"+s+"true"
+                        proctotal += procdamage
+                print "--"
+            print "This proc causes at least "+str(unconditionalprocs)+"%, averaging "+str(round(unconditionalprocs*procrate/100.0,2))+"% damage"
+            print "This proc can cause up to "+str(proctotal)+"%, averaging "+str(round(proctotal*procrate/100.0,2))+"% damage"
+            print "---"
+        print "==="
+        sys.exit()
 
 if EXTRAFUNC=='selftest':
     ## Check for duplicate (fullname) entries

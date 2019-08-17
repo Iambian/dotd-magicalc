@@ -144,6 +144,33 @@ License
 -------
 It's the MIT License. See `LICENSE` for more details.
 
+Additional Modes of Operation
+-----------------------------
+Instead of displaying optimal magics, the script can do other things. Most of
+these exist for debugging purposes, but they might be useful to you.
+
+* `python dotdmagi.py dumpnames` displays all registered name/abbreviation pairs,
+  including doubles for sorting purposes
+* `python dotdmagi.py selftest` performs various internal consistency checks
+  and displays the results of those checks.
+* `python dotdmagi.py dumpavg` displays all spells and pairs with their averages
+  calculated. Assumes no tags nor any synergies were applied.
+* `python dotdmagi.py count` displays the number of spells and automatically
+  generated spell pairs (metamagic).
+* `python dotdmagi.py find=[spellname]` searches the database for the spellname
+  or abbreviation (w/o brackets) and prints the found spell's name and abbreviation
+  pair. If the name contains spaces, you must enclose the whole name in quotes.
+  These searches are case-insensitive.
+  * Example 1: `python dotdmagi.py find=ToTH`
+  * Example 2: `python dotdmagi.py find="Traditions of the Hunt"`
+* `python dotdmagi.py proc=[spellname]` searches the database for the spellname
+  or abbreviation (w/o brackets) and prints the proc information it finds.
+  If the name contains spaces, you must enclose the whole name in quotes.
+  These searches are case-insensitive.
+  * Example 1: `python dotdmagi.py proc=MID`
+  * Example 2: `python dotdmagi.py proc="Mark of the Infinite Dawn"`
+
+
 Version History
 ---------------
 * 0.1 - First release. Seems to largely work
@@ -155,6 +182,8 @@ Version History
 		lists. Work was done to try to solve the problem of calculating cast magic
 		synergies. Profiles added. A toggle to allow use of rare magics added. Added
 		a switch to allow optimization for leaderboard hits.
+* 0.5 - Made internal magic name and abbreviation searches case-insensitive.
+		Made the database user-searchable via find and proc commands
 		
 		
 		
