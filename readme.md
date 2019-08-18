@@ -169,6 +169,25 @@ these exist for debugging purposes, but they might be useful to you.
   These searches are case-insensitive.
   * Example 1: `python dotdmagi.py proc=MID`
   * Example 2: `python dotdmagi.py proc="Mark of the Infinite Dawn"`
+  
+Support for Python 3
+--------------------
+
+Another copy of the script was generated via the [2to3 tool](https://docs.python.org/2/library/2to3.html)
+to hopefully run with Python3. Cursory testing shows that it does not immediately
+crash and burn, so run it with care.
+
+To use this, instead of doing
+
+`python dotdmagi.py`
+
+do this instead:
+
+`py dotdmagi3.py`
+
+All parameters used will be the same as with the original script
+
+Example: `py dotdmagi3.py 10 deadly dragon`
 
 
 Version History
