@@ -46,7 +46,7 @@ OWNED = {
         "CP","DF","DS","DE","DM","deep","dehum","disc","disi","dism","Dj","door","dup","elec","EFF","ES","exo","EitD","FaA",
         "fire","FS","FotD","GG","GB","GID","GMT","GF","GSR","hail","harm","HC","HvK","HK","hemo","hib","HSE","HN","howl",
         "IS","ID","IB","IL","insp","int","intox","IG","LID","LP","lev","LR","LD","MID","melt","MT","MTS","MS",
-        "NK","NM","NB","OB","PB","PoL","P","pos","PL","puri","PS","QM","QKF","RD","rally","RS","res","SaM","SE","7U","SS","SM",
+        "NK","NM","NB","OB","PB","PoL","P","pos","PL","puri","PS","PT","QM","QKF","RD","rally","RS","res","SaM","SE","7U","SS","SM",
         "siphon","SP","SoL","TK","TotH","typh","uni","VA","VS","VR","VE","weight","WaS","WV","#1#","#2#","#3#"
     ],
     'GIANTESSENCE':9,
@@ -150,6 +150,7 @@ OWNED = {
     'SET_VIOLET_KNIGHT':0,        #9 for set
     'SET_DEPTH_TERROR':0,         #10 for set
     'ITM_LEGEND_OF_THE_DEMIGOD':True, #For lv10k magic
+    'TITAN_RIPPERS_RAPTOR':False,
 }
 
 
@@ -173,7 +174,7 @@ if checkDel('profile=maxed') or checkDel('profile=whale') or checkDel('profile=w
             "CP","CoS","DF","DS","DE","DM","deep","dehum","desi","DD","disc","disi","dism","Dj","door","DB","DT","dup","elec","EFF","ES","exo","EW","EitD","FaF","FaA",
             "FeA","FF","fey","fire","FS","FW","FIWL","FotD","GG","GM","GB","GID","GMT","GP","GuB","GF","GSR","hail","harm","HC","HvK","HK","hemo","hib","HSE","HN","howl",
             "IS","ID","IB","IL","insp","int","intox","IG","judge","KG","KN","LID","LP","lev","LR","LD","LS","MD","MV","MG","MID","MRW","MoM","mel","melt","MT","MTS","MS",
-            "NK","NM","NB","OB","PB","PoL","P","pos","PL","puri","PS","QM","QSP","QKF","RT","RB","RD","rally","ref","RS","res","sand","sap","SaM","SE","7U","SS","SM",
+            "NK","NM","NB","OB","PB","PoL","P","pos","PL","puri","PS","PT","QM","QSP","QKF","RT","RB","RD","rally","ref","RS","res","sand","sap","SaM","SE","7U","SS","SM",
             "shrink","siphon","SMITE","SP","SoS","surv","SoL","TB","TK","TotH","typh","uni","VA","VD","VS","VotD","VR","VE","weight","WaS","WV","#1#","#2#","#3#","#4#"
         ],
         'GIANTESSENCE':9,
@@ -277,6 +278,7 @@ if checkDel('profile=maxed') or checkDel('profile=whale') or checkDel('profile=w
         'SET_VIOLET_KNIGHT':9,        #9 for set
         'SET_DEPTH_TERROR':10,        #10 for set
         'ITM_LEGEND_OF_THE_DEMIGOD':True, #For lv10k magic
+        'TITAN_RIPPERS_RAPTOR':True,
         }
     pass
     
@@ -393,6 +395,7 @@ elif checkDel('profile=alt'):
         'SET_VIOLET_KNIGHT':0,        #9 for set
         'SET_DEPTH_TERROR':0,         #10 for set
         'ITM_LEGEND_OF_THE_DEMIGOD':False, #For lv10k magic
+        'TITAN_RIPPERS_RAPTOR':False,
     }
     
 else:
@@ -1744,6 +1747,14 @@ m.newTrig('spellowned',"Obedience")
 m.newDmg(50)
 m.newTrig('spellcast',"")
 m.newProc(15)
+#
+m = Magic("Pack Tactics","PT")
+m.newDmg(2100)
+m.newTrigTag('giant')
+m.newDmg( lambda : 100 * OWNED['TITAN_RIPPERS_RAPTOR'] )
+m.newTrigTag('giant')
+m.newDmg(600)
+m.newProc(5)
 #
 m = Magic("Pestilent Bolt","PB")
 m.newDmg(550)
