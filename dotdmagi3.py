@@ -49,7 +49,7 @@ OWNED = {
         "NK","NM","NB","OB","PB","PoL","P","pos","PL","puri","PS","PT","QM","QKF","RD","rally","RS","res","SaM","SE","7U","SS","SM",
         "siphon","SP","SoL","TK","TotH","typh","uni","VA","VS","VR","VE","weight","WaS","WV","#1#","#2#","#3#"
     ],
-    'GIANTESSENCE':9,
+    'GIANTESSENCE':10,
     'BEASTMANESSENCE':22,
     'FESTIVALESSENCE':11,
     'UNDERGROUNDESSENCE':35,
@@ -177,7 +177,7 @@ if checkDel('profile=maxed') or checkDel('profile=whale') or checkDel('profile=w
             "NK","NM","NB","OB","PB","PoL","P","pos","PL","puri","PS","PT","QM","QSP","QKF","RT","RB","RD","rally","ref","RS","res","sand","sap","SaM","SE","7U","SS","SM",
             "shrink","siphon","SMITE","SP","SoS","surv","SoL","TB","TK","TotH","typh","uni","VA","VD","VS","VotD","VR","VE","weight","WaS","WV","#1#","#2#","#3#","#4#"
         ],
-        'GIANTESSENCE':9,
+        'GIANTESSENCE':10,
         'BEASTMANESSENCE':22,
         'FESTIVALESSENCE':11,
         'UNDERGROUNDESSENCE':35,
@@ -1083,7 +1083,7 @@ m.newTrig('spellowned',"Death Echo")
 m.newDmg(50)
 m.newProc(10)
 #
-m = Magic("Deathbane","DB")
+m = Magic("Deathbane","dbane")
 m.newDmg(105)
 m.newTrigTag('undead')
 m.newDmg(18)

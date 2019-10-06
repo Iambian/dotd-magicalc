@@ -1083,7 +1083,7 @@ m.newTrig('spellowned',"Death Echo")
 m.newDmg(50)
 m.newProc(10)
 #
-m = Magic("Deathbane","DB")
+m = Magic("Deathbane","dbane")
 m.newDmg(105)
 m.newTrigTag('undead')
 m.newDmg(18)
