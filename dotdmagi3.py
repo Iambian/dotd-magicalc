@@ -1083,6 +1083,14 @@ m.newTrig('spellowned',"Death Echo")
 m.newDmg(50)
 m.newProc(10)
 #
+m = Magic("Deathbane","DB")
+m.newDmg(105)
+m.newTrigTag('undead')
+m.newDmg(18)
+m.newTrig('spellcast',"Corpse Explosion")
+m.newDmg(18)
+m.newProc(100)
+#
 m = Magic("Deathmark","DM")
 m.newDmg(100)
 m.newTrig('spellowned',"Deathmark")
@@ -2399,8 +2407,11 @@ print(MAIN_DIVIDER)
 MetaMagic.fillMetaPairs()
 Magic.sortMagic()
 shortlist = ""
+count = 1
 for idx,spell in enumerate(Magic.spelllist[:SLOTNUM+MAGICLIST_EXTEND]):
-    print(spell.fullname + ": " + str(spell.getAvg()))
+    cs = str(count) + ": "
+    count += 1
+    print(cs + spell.fullname + ": " + str(spell.getAvg()))
     shortlist += spell.nickname
     if idx == SLOTNUM-1:
         print(HORIZONTAL_DIVIDER)
