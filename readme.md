@@ -23,6 +23,8 @@ limited time events.
 How to use
 ----------
 If you haven't installed Python 2.7.x, install it now before going any further.
+NOTE: If you have to install Python as a Windows user, ensure that Python is
+added to your PATH variable during installation; this isn't checked on by default.
 
 Open a command prompt in the directory/folder the script is and type
 
@@ -203,6 +205,6 @@ Version History
 		a switch to allow optimization for leaderboard hits.
 * 0.5 - Made internal magic name and abbreviation searches case-insensitive.
 		Made the database user-searchable via find and proc commands
-		
+* 0.51- Added another magic
 		
 		

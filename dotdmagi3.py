@@ -155,9 +155,9 @@ OWNED = {
 
 
 
-
+USERAREMAGIC = False
 if checkDel('raremagic=true'):  USERAREMAGIC = True
-else:                           USERAREMAGIC = False
+if checkDel('raremagics=true'): USERAREMAGIC = True
 if checkDel('avgmode=max'): AVGMODE = 'max'
 else:                       AVGMODE = 'avg'
 
@@ -171,7 +171,7 @@ if checkDel('profile=maxed') or checkDel('profile=whale') or checkDel('profile=w
         'MAGICS':187,
         ## SPELLS shows exactly what magics you own.
         'SPELLS':["LitD","AF","anni","AM","AD","ava","beach","BF","BD","BS","BoM","BL","BM","boil","BT","BB","BR","CD","cata","CE","CKi","CC","conf","cons","cont","CEx","corr",
-            "CP","CoS","DF","DS","DE","DM","deep","dehum","desi","DD","disc","disi","dism","Dj","door","DB","DT","dup","elec","EFF","ES","exo","EW","EitD","FaF","FaA",
+            "CP","CoS","dbane","DF","DS","DE","DM","deep","dehum","desi","DD","disc","disi","dism","Dj","door","DB","DT","dup","elec","EFF","ES","exo","EW","EitD","FaF","FaA",
             "FeA","FF","fey","fire","FS","FW","FIWL","FotD","GG","GM","GB","GID","GMT","GP","GuB","GF","GSR","hail","harm","HC","HvK","HK","hemo","hib","HSE","HN","howl",
             "IS","ID","IB","IL","insp","int","intox","IG","judge","KG","KN","LID","LP","lev","LR","LD","LS","MD","MV","MG","MID","MRW","MoM","mel","melt","MT","MTS","MS",
             "NK","NM","NB","OB","PB","PoL","P","pos","PL","puri","PS","PT","QM","QSP","QKF","RT","RB","RD","rally","ref","RS","res","sand","sap","SaM","SE","7U","SS","SM",
@@ -2018,6 +2018,20 @@ m.newTrigTag('undead')
 m.newTrig('spellcast',"Gravebane")
 m.newDmg(400)
 m.newProc(15)
+#
+m = Magic("Spirit Barrage","SB")
+m.newDmg(275)
+m.newTrigTag('undead')
+m.newDmg(40)
+m.newTrigTag('undead')
+m.newTrig('spellcast',"Corpse Explosion")
+m.newDmg(40)
+m.newTrigTag('magicalcreature')
+m.newDmg(40)
+m.newTrigTag('magicalcreature')
+m.newTrig('spellcast',"Howl of the Pack")
+m.newDmg(40)
+m.newProc(30)
 # 
 m = Magic("Stanzas of Slaughter","SoS")
 m.newDmg(120)
